@@ -32,7 +32,7 @@ GS is a CLI runtime that enforces a strict software development workflow combini
 
 ### Cách 1: Tự động (Windows) — 1 lệnh
 ```powershell
-git clone https://github.com/your-user/gs.git
+git clone https://github.com/nguyencuongmtkxtb-a11y/gs-runtime.git
 cd gs
 powershell -ExecutionPolicy Bypass -File .\scripts\install-full.ps1
 ```
@@ -59,7 +59,7 @@ cp -r /tmp/sp/skills/* ~/.config/opencode/skills/
 rm -rf /tmp/sp
 
 # 2. Clone + cài GS
-git clone https://github.com/your-user/gs.git
+git clone https://github.com/nguyencuongmtkxtb-a11y/gs-runtime.git
 cd gs
 npm install && npm run build && npm link
 
