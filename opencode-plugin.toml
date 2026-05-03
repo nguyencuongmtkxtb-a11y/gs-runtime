@@ -1,0 +1,4 @@
+[plugin]
+name = "gs"
+version = "1.0.0"
+description = "GS Runtime - Superpowers + GitNexus bridge. Enforced workflow automation for OpenCode."

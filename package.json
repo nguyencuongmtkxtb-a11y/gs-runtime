@@ -1,0 +1,63 @@
+{
+  "name": "gs",
+  "version": "1.0.0",
+  "description": "GS Runtime - Superpowers + GitNexus bridge for OpenCode. Enforced workflow automation.",
+  "type": "module",
+  "bin": {
+    "gs": "./dist/cli/index.js",
+    "gs-mcp": "./dist/mcp/server.js"
+  },
+  "main": "./dist/cli/index.js",
+  "files": [
+    "dist/",
+    "skills/",
+    "config/",
+    "scripts/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli/index.ts",
+    "dev:mcp": "tsx src/mcp/server.ts",
+    "start": "node dist/cli/index.js",
+    "start:mcp": "node dist/mcp/server.js",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist/",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "gitnexus": "*"
+  },
+  "peerDependenciesMeta": {
+    "gitnexus": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "author": "GS Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/gs.git"
+  },
+  "keywords": [
+    "opencode",
+    "superpowers",
+    "gitnexus",
+    "workflow",
+    "automation",
+    "mcp",
+    "cli"
+  ]
+}
