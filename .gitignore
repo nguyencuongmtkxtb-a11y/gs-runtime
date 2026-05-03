@@ -1,6 +1,8 @@
 node_modules/
 dist/
-.gs/
 *.tsbuildinfo
+.od/
+.tmp/
+.gs/state.json
 .env
 .vercel

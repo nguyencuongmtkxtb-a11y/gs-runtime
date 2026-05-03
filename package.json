@@ -42,8 +42,9 @@
       "optional": true
     }
   },
+  "packageManager": "pnpm@10.33.2",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=24.0.0"
   },
   "license": "MIT",
   "author": "GS Contributors",

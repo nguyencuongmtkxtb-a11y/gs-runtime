@@ -11,8 +11,10 @@ import { checkIndex } from "../gitnexus/bridge.js";
 import { StateMachine } from "../cli/state-machine.js";
 import type { GSState, Phase, MCPWorkflowStatus, MCPFileCheckResult, MCPPreCommitResult, PlanTask } from "../shared/types.js";
 import { PHASE_LABELS, PHASE_DESCRIPTIONS } from "../shared/types.js";
+import { DESIGN_TOOL_DEFINITIONS, handleDesignTool } from "./design-tools.js";
 
 const TOOL_DEFINITIONS = [
+  ...DESIGN_TOOL_DEFINITIONS,
   {
     name: "gs_workflow_status",
     description:
@@ -349,6 +351,17 @@ export async function startMCPServer(): Promise<void> {
               new_phase: newPhase,
               message: `Phase "${prevPhase}" completed and output recorded.${transitionMsg}`,
             }, null, 2) }],
+          };
+        }
+
+        case "gs_list_design_skills":
+        case "gs_load_design_system":
+        case "gs_search_design_systems":
+        case "gs_detect_agents":
+        case "gs_compose_design_prompt": {
+          const result = await handleDesignTool(name, (args ?? {}) as Record<string, unknown>);
+          return {
+            content: [{ type: "text", text: result }],
           };
         }
 

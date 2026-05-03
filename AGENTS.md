@@ -71,6 +71,34 @@ Fall back to `grep` and file reads only when GitNexus is unavailable.
 - ❌ Skipping phases
 - ❌ Claiming completion without `gs_propose_transition`
 
+## Open Design Integration
+
+This project integrates **Open Design** (https://github.com/nexu-io/open-design) as a submodule at `integrations/open-design/`.
+
+### Available Design Capabilities
+
+- **57 Design Skills** in `integrations/open-design/skills/` — web prototypes, mobile apps, dashboards, presentations, marketing materials
+- **129 Design Systems** in `integrations/open-design/design-systems/` — brand-grade DESIGN.md files (Linear, Stripe, Vercel, Apple, etc.)
+- **Agent Detection** — scan PATH for 13 CLI agents to use as design engines
+- **Prompt Stack** — discovery forms, critique checklists, anti-slop rules
+
+### MCP Design Tools
+
+| Tool | Purpose |
+|------|---------|
+| `gs_list_design_skills` | List all 57 skills grouped by scenario |
+| `gs_load_design_system` | Load a DESIGN.md by name |
+| `gs_search_design_systems` | Search design systems by keyword |
+| `gs_detect_agents` | Detect available CLI agents on PATH |
+| `gs_compose_design_prompt` | Compose design prompt with system + skill |
+
+### When to Use Design Skills
+
+- **brainstorming**: Use `wireframe-sketch` for quick visual ideation
+- **implementing**: Use `web-prototype`, `dashboard`, `mobile-app` for UI tasks
+- **reviewing**: Use `critique` for 5-dimensional design review
+- Load the `od-bridge` skill for full integration details
+
 ## Violation Consequences
 
 If you violate any rule, the MCP server will reject your operation. If you continue to violate rules, the CLI will reject phase transitions. Always follow the workflow.

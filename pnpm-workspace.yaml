@@ -1,0 +1,6 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "tools/*"
+  - "e2e"
+  - "integrations/open-design"
