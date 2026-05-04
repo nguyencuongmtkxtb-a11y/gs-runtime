@@ -37,7 +37,16 @@ function loadIgnorePatterns(root: string): string[] {
 
 export function checkScout(root: string, filePath: string): ScoutCheckResult {
   const patterns = loadIgnorePatterns(root);
-  const normalized = filePath.replace(/\\/g, "/");
+  let normalized = filePath.replace(/\\/g, "/");
+
+  // Strip Windows drive letter prefix (e.g., "C:/", "D:/") to ensure
+  // pattern matching works correctly regardless of absolute vs relative paths
+  normalized = normalized.replace(/^[a-zA-Z]:\//, "");
+
+  // Strip leading slashes (Unix absolute paths)
+  while (normalized.startsWith("/")) {
+    normalized = normalized.slice(1);
+  }
 
   for (const pattern of patterns) {
     const clean = pattern.replace(/\/$/, "");
