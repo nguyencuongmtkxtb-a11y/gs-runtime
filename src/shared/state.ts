@@ -235,7 +235,7 @@ export function parsePlanTasks(planContent: string): PlanTask[] {
   const tasks: PlanTask[] = [];
   const lines = planContent.split("\n");
 
-  const taskPattern = /^###\s+(T\d[\d.]*)\s*[—–-]\s*(.+)$/;
+  const taskPattern = /^###\s+(T\d[\d.]*|Task\s+\d+)\s*[—–:-]\s*(.+)$/;
   let currentTask: Partial<PlanTask> | null = null;
 
   for (const line of lines) {
@@ -245,7 +245,7 @@ export function parsePlanTasks(planContent: string): PlanTask[] {
         finalizeTask(currentTask, tasks);
       }
       currentTask = {
-        id: match[1].replace(/\./g, "_").toLowerCase(),
+        id: match[1].replace(/\./g, "_").replace(/\s+/g, "_").toLowerCase(),
         description: `${match[1]}: ${match[2].trim()}`,
         files: [],
         tests: [],
@@ -257,7 +257,7 @@ export function parsePlanTasks(planContent: string): PlanTask[] {
     }
 
     if (currentTask) {
-      const fileMatch = line.match(/^\s*- \*\*Files\*\*:\s*(.+)$/);
+      const fileMatch = line.match(/^\s*- \*\*Files?\*\*:\s*(.+)$/);
       if (fileMatch) {
         const raw = fileMatch[1];
         const fileRefs = raw
