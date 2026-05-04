@@ -110,6 +110,18 @@ const TOOL_DEFINITIONS = [
     },
   },
   {
+    name: "gs_blast_radius",
+    description: "Calculate blast radius for a file: which files import it (directly and transitively). Uses TypeScript import resolution — more accurate than GitNexus for cross-file dependencies.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        file: { type: "string", description: "Relative file path to analyze (e.g., 'src/shared/state.ts')" },
+        maxDepth: { type: "number", description: "Max traversal depth (default: 3)" },
+      },
+      required: ["file"],
+    },
+  },
+  {
     name: "gs_start_workflow",
     description: "Start a workflow from idle state. Call this when user describes a feature/fix and the project is in idle phase. Modes: 'full' (brainstorm→plan→implement→review→finish) or 'quick' (straight to implementing with relaxed rules).",
     inputSchema: {
@@ -457,23 +469,40 @@ export async function startMCPServer(): Promise<void> {
           }
           const concept = (args as Record<string, unknown>).concept as string;
 
-          if (!state.gitnexus.indexed) {
-            return {
-              content: [{ type: "text", text: JSON.stringify({
-                concept,
-                gitnexus_available: false,
-                instruction: "GitNexus is not indexed. Use file reads and grep to explore the codebase manually.",
-                current_phase: PHASE_LABELS[state.currentPhase],
-                phase_context: PHASE_DESCRIPTIONS[state.currentPhase],
-              }, null, 2) }],
-            };
+          // Build import graph supplement for cross-file dependencies
+          let importContext: unknown = null;
+          try {
+            const { buildDependencyMap } = await import("../gitnexus/import-resolver.js");
+            const depMap = buildDependencyMap(process.cwd());
+            // Find files related to the concept (simple keyword match on file paths)
+            const conceptLower = concept.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const relatedFiles = Object.keys(depMap.importsFrom).filter((f) =>
+              f.toLowerCase().replace(/[^a-z0-9/.]/g, "").includes(conceptLower)
+            );
+
+            if (relatedFiles.length > 0) {
+              const fileDetails = relatedFiles.slice(0, 5).map((f) => ({
+                file: f,
+                imports: (depMap.importsFrom[f] ?? []).map((e) => ({ from: e.to, symbols: e.symbols })),
+                importedBy: (depMap.importedBy[f] ?? []).map((e) => ({ by: e.from, symbols: e.symbols })),
+              }));
+              importContext = {
+                totalEdges: depMap.edgeCount,
+                relatedFiles: fileDetails,
+              };
+            }
+          } catch {
+            // Import resolver not available — continue without
           }
 
           return {
             content: [{ type: "text", text: JSON.stringify({
               concept,
-              gitnexus_available: true,
-              instruction: `Use GitNexus MCP tools: 'query' with query "${concept}" then 'context' on relevant symbols.`,
+              gitnexus_available: state.gitnexus.indexed,
+              instruction: state.gitnexus.indexed
+                ? `Use GitNexus MCP tools: 'query' with query "${concept}" then 'context' on relevant symbols. Note: GitNexus may miss cross-file import edges — use the importGraph below as supplement.`
+                : "GitNexus not indexed. Use file reads and grep, plus importGraph below.",
+              importGraph: importContext,
               current_phase: PHASE_LABELS[state.currentPhase],
               phase_context: PHASE_DESCRIPTIONS[state.currentPhase],
             }, null, 2) }],
@@ -611,6 +640,42 @@ export async function startMCPServer(): Promise<void> {
               message: `Phase "${prevPhase}" completed and output recorded.${nextLabel}`,
             }, null, 2) }],
           };
+        }
+
+        case "gs_blast_radius": {
+          const blastArgs = args as Record<string, unknown>;
+          const targetFile = blastArgs.file as string;
+          const maxDepth = (blastArgs.maxDepth as number) ?? 3;
+
+          try {
+            const { calculateBlastRadius, getUpstreamDependents, getDownstreamDependencies, buildDependencyMap } = await import("../gitnexus/import-resolver.js");
+            const depMap = buildDependencyMap(process.cwd());
+            const upstream = getUpstreamDependents(process.cwd(), targetFile, depMap);
+            const downstream = getDownstreamDependencies(process.cwd(), targetFile, depMap);
+            const blastRadius = calculateBlastRadius(process.cwd(), targetFile, maxDepth);
+
+            const risk = blastRadius.length >= 10 ? "HIGH" : blastRadius.length >= 5 ? "MEDIUM" : "LOW";
+
+            return {
+              content: [{ type: "text", text: JSON.stringify({
+                file: targetFile,
+                risk,
+                directImporters: upstream.map((e) => ({ file: e.from, symbols: e.symbols })),
+                directDependencies: downstream.map((e) => ({ file: e.to, symbols: e.symbols })),
+                blastRadius: blastRadius.map((r) => ({ depth: r.depth, file: r.file, symbols: r.symbols })),
+                summary: `${upstream.length} direct importers, ${blastRadius.length} total affected files (depth ${maxDepth})`,
+                totalProjectEdges: depMap.edgeCount,
+              }, null, 2) }],
+            };
+          } catch (err) {
+            return {
+              content: [{ type: "text", text: JSON.stringify({
+                error: `Failed to calculate blast radius: ${err instanceof Error ? err.message : String(err)}`,
+                file: targetFile,
+              }, null, 2) }],
+              isError: true,
+            };
+          }
         }
 
         case "gs_start_workflow": {
