@@ -7,7 +7,7 @@ import {
   ErrorCode,
 } from "@modelcontextprotocol/sdk/types.js";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { loadState, saveState, getNextPhase, parsePlanTasks } from "../shared/state.js";
 import { checkIndex } from "../gitnexus/bridge.js";
 import { StateMachine } from "../cli/state-machine.js";
@@ -21,6 +21,24 @@ import type { GSState, Phase, MCPWorkflowStatus, MCPFileCheckResult, MCPPreCommi
 import { PHASE_LABELS, PHASE_DESCRIPTIONS } from "../shared/types.js";
 import { DESIGN_TOOL_DEFINITIONS, handleDesignTool } from "./design-tools.js";
 
+// Helper: resolve project root from args (supports cross-project)
+function resolveProjectRoot(args: Record<string, unknown> | undefined | null): string {
+  const projectPath = args?.project_path as string | undefined;
+  if (projectPath) {
+    const resolved = resolve(projectPath);
+    if (existsSync(resolved)) return resolved;
+  }
+  return process.cwd();
+}
+
+// Common optional parameter for cross-project support
+const PROJECT_PATH_PARAM = {
+  project_path: {
+    type: "string",
+    description: "Optional: absolute path to the target project. If omitted, uses the current working directory. Use this when working with a project outside the workspace root.",
+  },
+};
+
 const TOOL_DEFINITIONS = [
   ...DESIGN_TOOL_DEFINITIONS,
   {
@@ -29,7 +47,7 @@ const TOOL_DEFINITIONS = [
       "REQUIRED: Call this FIRST before any action. Returns the current workflow phase, status, and what you must do next. Failing to call this first will cause errors.",
     inputSchema: {
       type: "object" as const,
-      properties: {},
+      properties: { ...PROJECT_PATH_PARAM },
       required: [],
     },
   },
@@ -40,6 +58,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         path: { type: "string", description: "The file path you want to operate on" },
         operation: {
           type: "string",
@@ -56,7 +75,7 @@ const TOOL_DEFINITIONS = [
       "REQUIRED: Call this BEFORE every git commit. Runs pre-commit checks: tests, GitNexus impact analysis. Returns whether commit is safe to proceed.",
     inputSchema: {
       type: "object" as const,
-      properties: {},
+      properties: { ...PROJECT_PATH_PARAM },
       required: [],
     },
   },
@@ -67,6 +86,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         concept: { type: "string", description: "The concept, feature area, or symbol to get context about" },
       },
       required: ["concept"],
@@ -79,6 +99,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         target_phase: {
           type: "string",
           description: "The phase to transition to (e.g., 'planning', 'implementing', 'reviewing', 'finishing')",
@@ -93,6 +114,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         task_id: { type: "string", description: "The ID of the task to mark complete" },
       },
       required: ["task_id"],
@@ -104,6 +126,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         output: { type: "string", description: "Description or file path of the output" },
       },
       required: ["output"],
@@ -115,6 +138,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         file: { type: "string", description: "Relative file path to analyze (e.g., 'src/shared/state.ts')" },
         maxDepth: { type: "number", description: "Max traversal depth (default: 3)" },
       },
@@ -127,6 +151,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         description: { type: "string", description: "Feature/fix description from the user" },
         mode: { type: "string", enum: ["full", "quick"], description: "Workflow mode: 'full' for complex features, 'quick' for bug fixes and small changes" },
         ui: { type: "boolean", description: "Whether this is a UI/design task (enables Open Design enforcement)" },
@@ -140,6 +165,7 @@ const TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object" as const,
       properties: {
+        ...PROJECT_PATH_PARAM,
         id: { type: "string", description: "Task ID (e.g., 't1', 'auth-setup')" },
         description: { type: "string", description: "Task description" },
         files: {
@@ -160,12 +186,13 @@ const TOOL_DEFINITIONS = [
   },
 ];
 
-function loadProjectState(): { state: GSState | null; error: string | null } {
-  const state = loadState();
+function loadProjectState(projectRoot?: string): { state: GSState | null; error: string | null; projectRoot: string } {
+  const root = projectRoot ?? process.cwd();
+  const state = loadState(root);
   if (!state) {
-    return { state: null, error: "GS not initialized in this project. Run 'gs init' first." };
+    return { state: null, error: `GS not initialized in "${root}". Run 'gs init' first.`, projectRoot: root };
   }
-  return { state, error: null };
+  return { state, error: null, projectRoot: root };
 }
 
 export async function startMCPServer(): Promise<void> {
@@ -180,7 +207,8 @@ export async function startMCPServer(): Promise<void> {
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
-    const { state, error } = loadProjectState();
+    const projectRoot = resolveProjectRoot(args as Record<string, unknown>);
+    const { state, error } = loadProjectState(projectRoot);
 
     try {
       switch (name) {
@@ -195,7 +223,7 @@ export async function startMCPServer(): Promise<void> {
             };
           }
 
-          const session = loadSession(process.cwd());
+          const session = loadSession(projectRoot);
           let phaseInstructions: string;
           if (state.currentPhase === "idle" || state.currentPhase === "completed") {
             phaseInstructions = "Ready to start. Call gs_start_workflow with the user's request description and mode ('full' for features, 'quick' for fixes/small changes).";
@@ -212,7 +240,7 @@ export async function startMCPServer(): Promise<void> {
             workflowMode: state.workflowMode ?? "full",
             gitnexus: { indexed: state.gitnexus.indexed, stale: state.gitnexus.stale },
             instructions: quickModeInstructions,
-            resumeContext: session ? buildResumeContext(process.cwd()) : null,
+            resumeContext: session ? buildResumeContext(projectRoot) : null,
           };
 
           return {
@@ -256,7 +284,7 @@ export async function startMCPServer(): Promise<void> {
           }
 
           // Write/edit/delete: scout block applies
-          const scout = checkScout(process.cwd(), filePath);
+          const scout = checkScout(projectRoot, filePath);
           if (scout.blocked) {
             return {
               content: [{ type: "text", text: JSON.stringify({
@@ -323,7 +351,7 @@ export async function startMCPServer(): Promise<void> {
             if (state.workflowMode === "quick") {
               let hookMessages: string[] = [];
               if (operation === "write" || operation === "edit") {
-                const simplify = trackEditAndCheck(process.cwd());
+                const simplify = trackEditAndCheck(projectRoot);
                 if (simplify.shouldRemind) {
                   hookMessages.push(simplify.message);
                 }
@@ -342,7 +370,7 @@ export async function startMCPServer(): Promise<void> {
 
             if (state.plan.tasks.length === 0) {
               // Check if plan.md exists — if it does, tasks should have been parsed
-              const planPath = join(process.cwd(), ".gs", "plan.md");
+              const planPath = join(projectRoot, ".gs", "plan.md");
               const planExists = existsSync(planPath);
               const severity = planExists ? "warn" : "info";
               const reason = planExists
@@ -378,12 +406,12 @@ export async function startMCPServer(): Promise<void> {
 
             let hookMessages: string[] = [];
             if (operation === "write" || operation === "edit") {
-              const simplify = trackEditAndCheck(process.cwd());
+              const simplify = trackEditAndCheck(projectRoot);
               if (simplify.shouldRemind) {
                 hookMessages.push(simplify.message);
               }
 
-              const planCheck = validatePlanFormat(process.cwd(), filePath);
+              const planCheck = validatePlanFormat(projectRoot, filePath);
               if (!planCheck.valid || planCheck.issues.length > 0) {
                 hookMessages.push(`Plan format issues: ${planCheck.issues.join("; ")}`);
               }
@@ -436,7 +464,7 @@ export async function startMCPServer(): Promise<void> {
             } as MCPPreCommitResult, null, 2) }] };
           }
 
-          const securityScan = scanStagedFiles(process.cwd());
+          const securityScan = scanStagedFiles(projectRoot);
           const issues: string[] = [];
           if (!securityScan.passed) {
             for (const f of securityScan.findings.filter((f) => f.severity === "critical")) {
@@ -473,7 +501,7 @@ export async function startMCPServer(): Promise<void> {
           let importContext: unknown = null;
           try {
             const { buildDependencyMap } = await import("../gitnexus/import-resolver.js");
-            const depMap = buildDependencyMap(process.cwd());
+            const depMap = buildDependencyMap(projectRoot);
             // Find files related to the concept (simple keyword match on file paths)
             const conceptLower = concept.toLowerCase().replace(/[^a-z0-9]/g, "");
             const relatedFiles = Object.keys(depMap.importsFrom).filter((f) =>
@@ -516,7 +544,7 @@ export async function startMCPServer(): Promise<void> {
           const targetPhase = (args as Record<string, unknown>).target_phase as Phase;
 
           if (state.currentPhase === "brainstorming" && targetPhase === "planning") {
-            const designPath = join(process.cwd(), ".gs", "design.md");
+            const designPath = join(projectRoot, ".gs", "design.md");
             if (!existsSync(designPath)) {
               return {
                 content: [{ type: "text", text: JSON.stringify({
@@ -538,19 +566,19 @@ export async function startMCPServer(): Promise<void> {
             }
           }
 
-          const sm = new StateMachine();
+          const sm = new StateMachine(projectRoot);
           const result = sm.executeTransition(targetPhase);
 
           if (result.success) {
             if (targetPhase === "reviewing" || targetPhase === "implementing") {
               await sm.reindexGitNexus();
             }
-            const existingSession = loadSession(process.cwd());
+            const existingSession = loadSession(projectRoot);
             if (existingSession) {
               updateSessionFromState(
                 existingSession,
                 sm.getState(),
-                process.cwd(),
+                projectRoot,
                 `gs_propose_transition:${targetPhase}`,
               );
             }
@@ -577,14 +605,14 @@ export async function startMCPServer(): Promise<void> {
             };
           }
           task.status = "completed";
-          saveState(state);
-          const session = loadSession(process.cwd());
+          saveState(state, projectRoot);
+          const session = loadSession(projectRoot);
           if (session) {
             session.planTasks = state.plan.tasks.map((t) => ({ id: t.id, description: t.description, status: t.status }));
             session.completedTasks = state.plan.tasks.filter((t) => t.status === "completed").map((t) => t.id);
             session.lastAction = `task_complete:${taskId}`;
             session.lastActionTime = new Date().toISOString();
-            saveSession(process.cwd(), session);
+            saveSession(projectRoot, session);
           }
           return {
             content: [{ type: "text", text: JSON.stringify({
@@ -602,12 +630,12 @@ export async function startMCPServer(): Promise<void> {
           }
           const output = (args as Record<string, unknown>).output as string;
 
-          const sm = new StateMachine();
+          const sm = new StateMachine(projectRoot);
           const prevPhase = sm.getCurrentPhase();
           const markResult = sm.markPhaseComplete(output);
 
           if (prevPhase === "planning") {
-            const planPath = join(process.cwd(), ".gs", "plan.md");
+            const planPath = join(projectRoot, ".gs", "plan.md");
             if (existsSync(planPath)) {
               const planContent = readFileSync(planPath, "utf-8");
               const extracted = parsePlanTasks(planContent);
@@ -623,12 +651,12 @@ export async function startMCPServer(): Promise<void> {
           const nextPhase = getNextPhase(prevPhase);
           const nextLabel = nextPhase ? ` Next: call gs_propose_transition with target "${nextPhase}" to continue.` : "";
 
-          const existingSession = loadSession(process.cwd());
+          const existingSession = loadSession(projectRoot);
           if (existingSession) {
             updateSessionFromState(
               existingSession,
               sm.getState(),
-              process.cwd(),
+              projectRoot,
               `gs_record_output:${prevPhase}`,
             );
           }
@@ -649,10 +677,10 @@ export async function startMCPServer(): Promise<void> {
 
           try {
             const { calculateBlastRadius, getUpstreamDependents, getDownstreamDependencies, buildDependencyMap } = await import("../gitnexus/import-resolver.js");
-            const depMap = buildDependencyMap(process.cwd());
-            const upstream = getUpstreamDependents(process.cwd(), targetFile, depMap);
-            const downstream = getDownstreamDependencies(process.cwd(), targetFile, depMap);
-            const blastRadius = calculateBlastRadius(process.cwd(), targetFile, maxDepth);
+            const depMap = buildDependencyMap(projectRoot);
+            const upstream = getUpstreamDependents(projectRoot, targetFile, depMap);
+            const downstream = getDownstreamDependencies(projectRoot, targetFile, depMap);
+            const blastRadius = calculateBlastRadius(projectRoot, targetFile, maxDepth);
 
             const risk = blastRadius.length >= 10 ? "HIGH" : blastRadius.length >= 5 ? "MEDIUM" : "LOW";
 
@@ -680,13 +708,13 @@ export async function startMCPServer(): Promise<void> {
 
         case "gs_start_workflow": {
           if (error || !state) {
-            return { content: [{ type: "text", text: "GS not initialized. Run 'gs init' in terminal first." }] };
+            return { content: [{ type: "text", text: `GS not initialized at "${projectRoot}". Run 'gs init' in that directory first.` }] };
           }
           if (state.currentPhase !== "idle" && state.currentPhase !== "completed") {
             return {
               content: [{ type: "text", text: JSON.stringify({
                 success: false,
-                message: `Workflow already active at phase "${PHASE_LABELS[state.currentPhase]}". Use gs_workflow_status to see current state, or ask user to run 'gs reset' to start over.`,
+                message: `Workflow already active at phase "${PHASE_LABELS[state.currentPhase]}" in "${projectRoot}". Use gs_workflow_status to see current state, or ask user to run 'gs reset' to start over.`,
               }, null, 2) }],
             };
           }
@@ -696,7 +724,7 @@ export async function startMCPServer(): Promise<void> {
           const mode = workflowArgs.mode as "full" | "quick";
           const isUI = (workflowArgs.ui as boolean) ?? false;
 
-          const sm = new StateMachine();
+          const sm = new StateMachine(projectRoot);
           let result: { success: boolean; message: string };
 
           if (mode === "quick") {
@@ -764,7 +792,7 @@ export async function startMCPServer(): Promise<void> {
           if (!state.plan.createdAt) {
             state.plan.createdAt = new Date().toISOString();
           }
-          saveState(state);
+          saveState(state, projectRoot);
 
           return {
             content: [{ type: "text", text: JSON.stringify({
