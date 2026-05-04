@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
-import type { GSState, Phase, PhaseState, PhaseStatus } from "./types.js";
+import type { GSState, Phase, PhaseState, PhaseStatus, PlanTask } from "./types.js";
 import { PHASE_ORDER, PHASE_LABELS } from "./types.js";
 
 const STATE_DIR = ".gs";
@@ -177,7 +177,7 @@ export function transitionTo(
     return { success: false, state, reason: "Invalid phase transition." };
   }
 
-  if (markCurrentComplete || isBackward) {
+  if (markCurrentComplete) {
     state.phases[state.currentPhase].status = "completed";
     state.phases[state.currentPhase].completedAt = new Date().toISOString();
   }
@@ -229,4 +229,84 @@ export function setPhaseStatus(
 ): GSState {
   state.phases[phase].status = status;
   return state;
+}
+
+export function parsePlanTasks(planContent: string): PlanTask[] {
+  const tasks: PlanTask[] = [];
+  const lines = planContent.split("\n");
+
+  const taskPattern = /^###\s+(T\d[\d.]*)\s*[—–-]\s*(.+)$/;
+  let currentTask: Partial<PlanTask> | null = null;
+
+  for (const line of lines) {
+    const match = line.match(taskPattern);
+    if (match) {
+      if (currentTask && currentTask.id) {
+        finalizeTask(currentTask, tasks);
+      }
+      currentTask = {
+        id: match[1].replace(/\./g, "_").toLowerCase(),
+        description: `${match[1]}: ${match[2].trim()}`,
+        files: [],
+        tests: [],
+        status: "pending",
+        priority: "medium",
+        estimatedMinutes: 3,
+      };
+      continue;
+    }
+
+    if (currentTask) {
+      const fileMatch = line.match(/^\s*- \*\*Files\*\*:\s*(.+)$/);
+      if (fileMatch) {
+        const raw = fileMatch[1];
+        const fileRefs = raw
+          .split(/,|và|and/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        for (const ref of fileRefs) {
+          const cleaned = ref
+            .replace(/[`*]/g, "")
+            .replace(/\(create\)|\(edit\)|\(create\s+dir\)|\(create\s+file\)/gi, "")
+            .trim();
+          if (cleaned && !cleaned.startsWith("•") && cleaned.length > 1) {
+            currentTask.files!.push(cleaned);
+          }
+        }
+      }
+
+      const testMatch = line.match(/^\s*- \*\*Tests\*\*:\s*(.+)$/);
+      if (testMatch) {
+        const testFiles = testMatch[1]
+          .split(/,/)
+          .map((s) => s.trim().replace(/[`*]/g, ""))
+          .filter(Boolean);
+        currentTask.tests!.push(...testFiles);
+      }
+
+      const priorityMatch = line.match(/^\s*- \*\*Priority\*\*:\s*(high|medium|low)/i);
+      if (priorityMatch) {
+        currentTask.priority = priorityMatch[1].toLowerCase() as "high" | "medium" | "low";
+      }
+
+      const estMatch = line.match(/^\s*- \*\*Est\*\*:\s*(\d+)\s*min/i);
+      if (estMatch) {
+        currentTask.estimatedMinutes = parseInt(estMatch[1], 10);
+      }
+    }
+  }
+
+  if (currentTask && currentTask.id) {
+    finalizeTask(currentTask, tasks);
+  }
+
+  return tasks;
+}
+
+function finalizeTask(task: Partial<PlanTask>, output: PlanTask[]): void {
+  if (!task.id) return;
+  if (!task.files || task.files.length === 0) {
+    task.files = [task.id];
+  }
+  output.push(task as PlanTask);
 }

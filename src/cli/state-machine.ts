@@ -23,6 +23,59 @@ import { scaffoldProject } from "./scaffold.js";
 import { createInitialSession, loadSession, saveSession, updateSessionFromState, ensureSessionDir } from "../shared/session-state.js";
 import pc from "picocolors";
 
+function buildDesignTemplate(description: string, isUITask: boolean): string {
+  return `# Design Document
+
+## Feature Description
+${description}
+
+## Requirements
+<!-- Functional and non-functional requirements -->
+
+### Functional
+- 
+
+### Non-Functional
+- Performance: 
+- Security: 
+- Accessibility: 
+
+## Architecture Decisions
+<!-- Key architectural choices and rationale -->
+
+| Decision | Rationale |
+|----------|-----------|
+
+## Existing Patterns
+<!-- Relevant codebase patterns found via GitNexus query -->
+
+## Dependencies
+<!-- What does this feature depend on? -->
+
+## Constraints
+<!-- Technical, business, or timeline constraints -->
+
+## Open Questions
+<!-- Questions that need answers before planning -->
+
+${isUITask ? `## Design System
+<!-- Chosen design system — determined during brainstorming via MCP tools -->
+- **System**: (run gs ui or gs_search_design_systems to pick)
+- **Skills**: (run gs_list_design_skills to pick)
+- **Tokens**: (run gs_load_design_system to load)
+
+## Visual Direction
+<!-- Describe the visual style: colors, typography, layout -->
+
+` : ""}
+## Next Steps
+1. Fill in the sections above
+2. Call \`gs_record_output\` with ".gs/design.md"
+3. Call \`gs_propose_transition\` with target "planning"
+4. Run \`gs plan\`
+`;
+}
+
 export class StateMachine {
   private state: GSState;
   private projectRoot: string;
@@ -74,9 +127,12 @@ export class StateMachine {
     logger.divider();
     const gnAvailable = isGitNexusAvailable();
     if (gnAvailable) {
-      logger.log("success", "GitNexus detected. Will index codebase.");
+      logger.log("success", "GitNexus detected. Indexing codebase...");
+      await this.autoIndex();
     } else {
-      logger.log("warn", "GitNexus not found. Graph features disabled. Install: npm install -g gitnexus");
+      logger.log("warn", "GitNexus not found. Install to enable graph features (review, impact analysis):");
+      logger.code("npm install -g gitnexus");
+      logger.code("gitnexus index");
     }
 
     const agentsPath = join(this.projectRoot, "AGENTS.md");
@@ -130,6 +186,14 @@ export class StateMachine {
     logger.step(description);
     logger.step(PHASE_DESCRIPTIONS[targetPhase]);
     await this.ensureGitNexusIndex();
+
+    const designPath = join(this.projectRoot, ".gs", "design.md");
+    if (!existsSync(designPath)) {
+      mkdirSync(join(this.projectRoot, ".gs"), { recursive: true });
+      const template = buildDesignTemplate(description, isUITask);
+      writeFileSync(designPath, template, "utf-8");
+      logger.log("success", ".gs/design.md template created. Fill in details, then gs_record_output.");
+    }
 
     logger.divider();
     logger.code("OpenCode will load 'gs' skill → brainstorm workflow");
@@ -262,7 +326,7 @@ export class StateMachine {
     if (this.state.currentPhase === "reviewing") {
       logger.log("warn", "Review already active. Continuing...");
       logger.section(`Phase: ${PHASE_LABELS[targetPhase]}`);
-      await this.ensureGitNexusIndex();
+      await this.reindexGitNexus();
       this.persist();
       return { success: true, message: "Review phase continued" };
     }
@@ -282,7 +346,7 @@ export class StateMachine {
 
     logger.section(`Phase: ${PHASE_LABELS[targetPhase]}`);
     logger.step(PHASE_DESCRIPTIONS[targetPhase]);
-    await this.ensureGitNexusIndex();
+    await this.reindexGitNexus();
 
     logger.divider();
     logger.code("OpenCode will review code with GitNexus detect_changes + impact");
@@ -369,6 +433,19 @@ export class StateMachine {
     logger.step(`Plan tasks: ${this.state.plan.tasks.length} total, ${this.state.plan.tasks.filter((t) => t.status === "completed").length} completed`);
     logger.step(`Workflow #${this.state.meta.workflowCount}`);
 
+    if (this.state.currentPhase === "brainstorming") {
+      const designPath = join(this.projectRoot, ".gs", "design.md");
+      if (!existsSync(designPath)) {
+        logger.log("warn", "Design doc (.gs/design.md) is MISSING. Agent must create it before transitioning to planning.");
+      }
+    }
+    if (this.state.currentPhase === "planning") {
+      const planPath = join(this.projectRoot, ".gs", "plan.md");
+      if (!existsSync(planPath)) {
+        logger.log("warn", "Plan (.gs/plan.md) is MISSING. Agent must create it before transitioning to implementing.");
+      }
+    }
+
     return "";
   }
 
@@ -385,8 +462,29 @@ export class StateMachine {
     }
   }
 
+  async reindexGitNexus(): Promise<void> {
+    if (!isGitNexusAvailable()) return;
+    logger.log("info", "Refreshing GitNexus index for review...");
+    const { stale } = checkIndex(this.projectRoot);
+    const result = await gitnexusAnalyze(this.projectRoot, true);
+    if (result.success) {
+      this.state.gitnexus.indexed = true;
+      this.state.gitnexus.lastIndexed = new Date().toISOString();
+      this.state.gitnexus.stale = false;
+      this.persist();
+    }
+  }
+
   addPlanTask(task: PlanTask): void {
     this.state.plan.tasks.push(task);
+    this.persist();
+  }
+
+  clearPlanTasks(): void {
+    this.state.plan.tasks = [];
+    if (!this.state.plan.createdAt) {
+      this.state.plan.createdAt = new Date().toISOString();
+    }
     this.persist();
   }
 

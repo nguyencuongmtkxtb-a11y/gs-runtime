@@ -6,7 +6,9 @@ import {
   McpError,
   ErrorCode,
 } from "@modelcontextprotocol/sdk/types.js";
-import { loadState, saveState, getNextPhase } from "../shared/state.js";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { loadState, saveState, getNextPhase, parsePlanTasks } from "../shared/state.js";
 import { checkIndex } from "../gitnexus/bridge.js";
 import { StateMachine } from "../cli/state-machine.js";
 import { loadSession, saveSession, updateSessionFromState, buildResumeContext } from "../shared/session-state.js";
@@ -222,6 +224,18 @@ export async function startMCPServer(): Promise<void> {
           }
 
           if (currentPhase === "implementing") {
+            if (state.plan.tasks.length === 0) {
+              return {
+                content: [{ type: "text", text: JSON.stringify({
+                  allowed: true,
+                  path: filePath,
+                  phase: currentPhase,
+                  reason: "No plan tasks registered. Plan-based gate bypassed (plan.md is source of truth). Run 'gs implement --force' to clear this warning.",
+                  planTask: null,
+                } as MCPFileCheckResult, null, 2) }],
+              };
+            }
+
             const matchingTask = state.plan.tasks.find(
               (t) => t.files.some((f) => filePath.includes(f.replace(/^\//, "")))
             );
@@ -358,8 +372,48 @@ export async function startMCPServer(): Promise<void> {
             return { content: [{ type: "text", text: "GS not initialized." }] };
           }
           const targetPhase = (args as Record<string, unknown>).target_phase as Phase;
+
+          if (state.currentPhase === "brainstorming" && targetPhase === "planning") {
+            const designPath = join(process.cwd(), ".gs", "design.md");
+            if (!existsSync(designPath)) {
+              return {
+                content: [{ type: "text", text: JSON.stringify({
+                  success: false,
+                  message: "Cannot transition to planning. .gs/design.md is missing. Write the design document, then call gs_record_output first.",
+                }, null, 2) }],
+                isError: true,
+              };
+            }
+            const content = readFileSync(designPath, "utf-8");
+            if (content.trim().length < 50) {
+              return {
+                content: [{ type: "text", text: JSON.stringify({
+                  success: false,
+                  message: "Cannot transition to planning. .gs/design.md is too short. Fill in requirements, architecture, and design decisions first.",
+                }, null, 2) }],
+                isError: true,
+              };
+            }
+          }
+
           const sm = new StateMachine();
           const result = sm.executeTransition(targetPhase);
+
+          if (result.success) {
+            if (targetPhase === "reviewing" || targetPhase === "implementing") {
+              await sm.reindexGitNexus();
+            }
+            const existingSession = loadSession(process.cwd());
+            if (existingSession) {
+              updateSessionFromState(
+                existingSession,
+                sm.getState(),
+                process.cwd(),
+                `gs_propose_transition:${targetPhase}`,
+              );
+            }
+          }
+
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
             isError: !result.success,
@@ -410,23 +464,38 @@ export async function startMCPServer(): Promise<void> {
           const prevPhase = sm.getCurrentPhase();
           const markResult = sm.markPhaseComplete(output);
 
-          const nextPhase = getNextPhase(prevPhase);
-          let transitionMsg = "";
-          let newPhase: Phase | null = null;
-          if (nextPhase && nextPhase !== "completed" && nextPhase !== "idle") {
-            const transResult = sm.executeTransition(nextPhase);
-            if (transResult.success) {
-              transitionMsg = ` Auto-transitioned to "${nextPhase}".`;
-              newPhase = nextPhase;
+          if (prevPhase === "planning") {
+            const planPath = join(process.cwd(), ".gs", "plan.md");
+            if (existsSync(planPath)) {
+              const planContent = readFileSync(planPath, "utf-8");
+              const extracted = parsePlanTasks(planContent);
+              if (extracted.length > 0) {
+                sm.clearPlanTasks();
+                for (const task of extracted) {
+                  sm.addPlanTask(task);
+                }
+              }
             }
+          }
+
+          const nextPhase = getNextPhase(prevPhase);
+          const nextLabel = nextPhase ? ` Next: call gs_propose_transition with target "${nextPhase}", then run 'gs ${nextPhase}' in terminal.` : "";
+
+          const existingSession = loadSession(process.cwd());
+          if (existingSession) {
+            updateSessionFromState(
+              existingSession,
+              sm.getState(),
+              process.cwd(),
+              `gs_record_output:${prevPhase}`,
+            );
           }
 
           return {
             content: [{ type: "text", text: JSON.stringify({
               success: true,
               completed_phase: prevPhase,
-              new_phase: newPhase,
-              message: `Phase "${prevPhase}" completed and output recorded.${transitionMsg}`,
+              message: `Phase "${prevPhase}" completed and output recorded.${nextLabel}`,
             }, null, 2) }],
           };
         }
