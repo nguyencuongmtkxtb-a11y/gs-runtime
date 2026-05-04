@@ -50,6 +50,12 @@
 
 | Milestone | Status |
 |-----------|--------|
+| **Bug fix: transitionTo backward jump corrupts completedAt** | ✅ Done |
+| **Bug fix: parsePlanTasks auto-populates plan.tasks from plan.md** | ✅ Done |
+| **Bug fix: gs_record_output no longer auto-transitions phases** | ✅ Done |
+| **Bug fix: session state synced on all MCP transitions** | ✅ Done |
+| **Bug fix: GitNexus auto-index on init + reindex on reviewing** | ✅ Done |
+| **Bug fix: gs_check_file fallback when plan.tasks is empty** | ✅ Done |
 | Unit tests for all hooks | ⬜ Todo |
 | Eval Tier 2 (E2E CLI spawn tests) | ⬜ Todo |
 | Eval Tier 3 (LLM judge) | ⬜ Todo |

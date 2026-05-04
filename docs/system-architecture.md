@@ -102,8 +102,9 @@ Core utilities used by all components.
 User: gs init
   → CLI creates StateMachine
   → createInitialState() → idle phase, all others pending
-  → scaffoldProject() → 14 template files
+  → scaffoldProject() → project template files
   → buildAgentsMd() → AGENTS.md with GS + Open Design rules
+  → isGitNexusAvailable() ? autoIndex() : prompt install
   → ensureSessionDir() + createInitialSession()
   → persist state + save session
 ```
@@ -121,14 +122,37 @@ User: gs brainstorm "tạo landing page..."
 
 ### `gs_check_file` flow (MCP)
 ```
-Agent: gs_check_file({path: "src/secret.ts", operation: "read"})
+Agent: gs_check_file({path: "src/feature.ts", operation: "write"})
   → Load GS state
-  → Privacy check: matches .env pattern? → @@PRIVACY_PROMPT@@ block
+  → Privacy check: sensitive file? → @@PRIVACY_PROMPT@@ block
   → Scout check: in blocked directory? → deny
-  → Phase check: brainstorming + write? → deny
+  → Phase check: brainstorming/planning + write? → deny
+  → Implementing + plan.tasks.length === 0? → allow with warning (plan.md fallback)
   → Plan check: implementing + unplanned file? → deny
   → Hook: track edit count, validate plan format
   → Allow
+```
+
+### `gs_record_output` flow (MCP)
+```
+Agent: gs_record_output({output: ".gs/plan.md"})
+  → Load GS state
+  → markPhaseComplete(currentPhase)
+  → If planning: parsePlanTasks(plan.md) → populate plan.tasks
+  → Update session via updateSessionFromState()
+  → Return: "Phase X completed. Next: gs_propose_transition target Y"
+  → NOTE: Does NOT auto-transition — agent must call gs_propose_transition explicitly
+```
+
+### `gs_propose_transition` flow (MCP)
+```
+Agent: gs_propose_transition({target_phase: "reviewing"})
+  → Validate: current phase is completed
+  → If brainstorming→planning: validate .gs/design.md exists (min 50 chars)
+  → executeTransition(targetPhase)
+  → If target is implementing or reviewing: reindexGitNexus() (force re-analyze)
+  → Update session via updateSessionFromState()
+  → Return success/failure
 ```
 
 ### `gs_pre_commit` flow (MCP)
