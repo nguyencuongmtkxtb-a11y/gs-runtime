@@ -115,6 +115,7 @@ export interface MCPWorkflowStatus {
   phases: Record<Phase, PhaseState>;
   gitnexus: { indexed: boolean; stale: boolean };
   instructions: string;
+  resumeContext: string | null;
 }
 
 export interface MCPFileCheckResult {
@@ -130,4 +131,12 @@ export interface MCPPreCommitResult {
   issues: string[];
   gitnexusImpact: unknown | null;
   testsStatus: "pass" | "fail" | "unknown";
+  security: {
+    scanned: boolean;
+    totalFindings: number;
+    critical: number;
+    high: number;
+    medium: number;
+    summary: string;
+  } | null;
 }

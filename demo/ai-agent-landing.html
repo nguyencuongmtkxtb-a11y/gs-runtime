@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexMind — AI Agents That Ship Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..590&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-black: #08090a;
+    --bg-panel: #0f1011;
+    --bg-surface: #191a1b;
+    --text-primary: #f7f8f8;
+    --text-secondary: #d0d6e0;
+    --text-tertiary: #8a8f98;
+    --text-quaternary: #62666d;
+    --brand: #5e6ad2;
+    --accent: #7170ff;
+    --accent-hover: #828fff;
+    --border-standard: rgba(255,255,255,0.08);
+    --border-subtle: rgba(255,255,255,0.05);
+    --btn-ghost-bg: rgba(255,255,255,0.02);
+    --btn-subtle-bg: rgba(255,255,255,0.04);
+  }
+
+  html { background: var(--bg-black); color: var(--text-primary); }
+  body {
+    font-family: "Inter", "Inter Variable", "SF Pro Display", -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv01", "ss03";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    font-size: 16px;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+  a { color: var(--text-secondary); text-decoration: none; }
+  a:hover { color: var(--text-primary); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+  /* Nav */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(8,9,10,0.82); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px; max-width: 1200px; margin: 0 auto; padding: 0 32px;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 8px; }
+  .nav-logo svg { width: 24px; height: 24px; }
+  .nav-logo span { font-size: 15px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.165px; }
+  .nav-links { display: flex; align-items: center; gap: 24px; }
+  .nav-links a { font-size: 14px; font-weight: 510; letter-spacing: -0.182px; }
+  .nav-cta {
+    background: var(--brand); color: #fff;
+    padding: 6px 14px; border-radius: 6px;
+    font-size: 13px; font-weight: 510;
+    transition: background 0.15s;
+  }
+  .nav-cta:hover { background: var(--accent-hover); color: #fff; }
+
+  /* Hero */
+  .hero { padding: 120px 0 100px; text-align: center; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--btn-subtle-bg); border: 1px solid var(--border-standard);
+    border-radius: 9999px; padding: 4px 14px 4px 6px;
+    font-size: 13px; font-weight: 510; color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+  .hero-badge-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #27a644;
+  }
+  .hero h1 {
+    font-size: 64px; font-weight: 510; line-height: 1.00;
+    letter-spacing: -1.408px; color: var(--text-primary);
+    max-width: 800px; margin: 0 auto 24px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 18px; font-weight: 400; line-height: 1.60;
+    letter-spacing: -0.165px; color: var(--text-tertiary);
+    max-width: 560px; margin: 0 auto 40px;
+  }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--brand); color: #fff;
+    padding: 10px 22px; border-radius: 6px;
+    font-size: 15px; font-weight: 510; letter-spacing: -0.165px;
+    border: none; cursor: pointer; transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--accent-hover); color: #fff; }
+  .btn-ghost {
+    background: var(--btn-ghost-bg); color: var(--text-secondary);
+    padding: 10px 22px; border-radius: 6px;
+    font-size: 15px; font-weight: 510; letter-spacing: -0.165px;
+    border: 1px solid var(--border-standard); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-ghost:hover { background: var(--btn-subtle-bg); color: var(--text-primary); }
+
+  .hero-terminal {
+    margin: 64px auto 0; max-width: 720px;
+    background: var(--bg-surface); border: 1px solid var(--border-standard);
+    border-radius: 12px; padding: 16px 20px; position: relative;
+    box-shadow: rgba(0,0,0,0.4) 0px 2px 4px, rgba(0,0,0,0.2) 0px 0px 0px 1px;
+  }
+  .hero-terminal-bar {
+    display: flex; gap: 6px; margin-bottom: 14px;
+  }
+  .hero-terminal-bar span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .hero-terminal-bar span:nth-child(1) { background: #ff5f56; }
+  .hero-terminal-bar span:nth-child(2) { background: #ffbd2e; }
+  .hero-terminal-bar span:nth-child(3) { background: #27c93f; }
+  .hero-terminal pre {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 13px; font-weight: 400; line-height: 1.60;
+    color: var(--text-secondary);
+  }
+  .hero-terminal pre .prompt { color: var(--accent); }
+  .hero-terminal pre .cmd { color: var(--text-primary); }
+  .hero-terminal pre .dim { color: var(--text-quaternary); }
+
+  /* Trust bar */
+  .trust {
+    padding: 0 0 80px; text-align: center;
+  }
+  .trust-label {
+    font-size: 12px; font-weight: 510; color: var(--text-quaternary);
+    letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 24px;
+  }
+  .trust-logos {
+    display: flex; justify-content: center; align-items: center; gap: 48px;
+    flex-wrap: wrap; opacity: 0.45;
+  }
+  .trust-logos span {
+    font-size: 18px; font-weight: 590; color: var(--text-secondary);
+    letter-spacing: -0.24px;
+  }
+
+  /* Features */
+  .section { padding: 80px 0; }
+  .section-label {
+    font-size: 12px; font-weight: 510; color: var(--text-quaternary);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+  }
+  .section h2 {
+    font-size: 48px; font-weight: 510; line-height: 1.00;
+    letter-spacing: -1.056px; color: var(--text-primary);
+    max-width: 600px; margin-bottom: 20px;
+  }
+  .section h2 span { color: var(--accent); }
+  .section-sub {
+    font-size: 18px; font-weight: 400; line-height: 1.60;
+    letter-spacing: -0.165px; color: var(--text-tertiary);
+    max-width: 520px; margin-bottom: 56px;
+  }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .feature-card {
+    background: var(--btn-ghost-bg); border: 1px solid var(--border-standard);
+    border-radius: 12px; padding: 28px; transition: all 0.2s;
+  }
+  .feature-card:hover {
+    background: var(--btn-subtle-bg); border-color: rgba(255,255,255,0.12);
+  }
+  .feature-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--btn-subtle-bg); border: 1px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; font-size: 18px;
+  }
+  .feature-card h3 {
+    font-size: 20px; font-weight: 590; line-height: 1.33;
+    letter-spacing: -0.24px; color: var(--text-primary); margin-bottom: 8px;
+  }
+  .feature-card p {
+    font-size: 15px; font-weight: 400; line-height: 1.60;
+    letter-spacing: -0.165px; color: var(--text-tertiary);
+  }
+
+  /* Capabilities */
+  .cap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .cap-card {
+    background: var(--btn-ghost-bg); border: 1px solid var(--border-standard);
+    border-radius: 12px; padding: 32px;
+    display: flex; gap: 20px; align-items: flex-start;
+    transition: all 0.2s;
+  }
+  .cap-card:hover {
+    background: var(--btn-subtle-bg); border-color: rgba(255,255,255,0.12);
+  }
+  .cap-icon {
+    width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+    background: var(--btn-subtle-bg); border: 1px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .cap-card h3 {
+    font-size: 20px; font-weight: 590; line-height: 1.33;
+    letter-spacing: -0.24px; color: var(--text-primary); margin-bottom: 6px;
+  }
+  .cap-card p {
+    font-size: 15px; font-weight: 400; line-height: 1.60;
+    letter-spacing: -0.165px; color: var(--text-tertiary);
+  }
+
+  /* Stats */
+  .stats { padding: 0 0 96px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+  .stat-card {
+    background: var(--btn-ghost-bg); border: 1px solid var(--border-standard);
+    border-radius: 12px; padding: 32px 20px;
+  }
+  .stat-number {
+    font-size: 48px; font-weight: 510; line-height: 1.00;
+    letter-spacing: -1.056px; color: var(--accent); margin-bottom: 8px;
+  }
+  .stat-label {
+    font-size: 15px; font-weight: 400; color: var(--text-tertiary);
+    letter-spacing: -0.165px;
+  }
+
+  /* Testimonial */
+  .testimonial {
+    background: var(--bg-panel); border: 1px solid var(--border-subtle);
+    border-radius: 16px; padding: 56px 64px; max-width: 800px; margin: 0 auto;
+    text-align: center;
+  }
+  .testimonial blockquote {
+    font-size: 24px; font-weight: 400; line-height: 1.42;
+    letter-spacing: -0.288px; color: var(--text-secondary);
+    margin-bottom: 28px;
+  }
+  .testimonial blockquote span { color: var(--accent); }
+  .testimonial-author { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .testimonial-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--border-standard);
+    background: var(--btn-subtle-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 590; color: var(--text-secondary);
+  }
+  .testimonial-name { font-size: 15px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.165px; }
+  .testimonial-role { font-size: 13px; font-weight: 400; color: var(--text-quaternary); }
+
+  /* CTA */
+  .cta {
+    text-align: center; padding: 100px 0 120px;
+  }
+  .cta h2 {
+    font-size: 48px; font-weight: 510; line-height: 1.00;
+    letter-spacing: -1.056px; color: var(--text-primary);
+    max-width: 680px; margin: 0 auto 16px;
+  }
+  .cta h2 span { color: var(--accent); }
+  .cta p {
+    font-size: 18px; font-weight: 400; line-height: 1.60;
+    letter-spacing: -0.165px; color: var(--text-tertiary);
+    max-width: 480px; margin: 0 auto 36px;
+  }
+  .cta-input-group {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .cta-input {
+    background: var(--btn-ghost-bg); color: var(--text-primary);
+    border: 1px solid var(--border-standard); border-radius: 6px;
+    padding: 10px 16px; font-size: 15px; font-weight: 400; width: 280px;
+    font-family: inherit; font-feature-settings: "cv01", "ss03";
+    outline: none; transition: border-color 0.15s;
+  }
+  .cta-input::placeholder { color: var(--text-quaternary); }
+  .cta-input:focus { border-color: var(--accent); }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: 48px 0;
+  }
+  .footer-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 20px;
+  }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 13px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; }
+  .footer-links a:hover { color: var(--text-secondary); }
+  .footer-copy { font-size: 13px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; }
+
+  /* Responsive */
+  @media (max-width: 1024px) { .features-grid { grid-template-columns: repeat(2, 1fr); } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hero h1 { font-size: 40px; letter-spacing: -0.88px; }
+    .hero p { font-size: 16px; }
+    .section h2 { font-size: 36px; letter-spacing: -0.792px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .cap-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .testimonial { padding: 36px 28px; }
+    .testimonial blockquote { font-size: 20px; }
+    .cta h2 { font-size: 36px; }
+    .container { padding: 0 20px; }
+    .nav-inner { padding: 0 20px; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 80px 0 64px; }
+    .hero h1 { font-size: 32px; letter-spacing: -0.704px; }
+    .hero-terminal pre { font-size: 11px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .stat-number { font-size: 36px; }
+    .section { padding: 56px 0; }
+    .cta { padding: 64px 0 80px; }
+    .footer-inner { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#5e6ad2"/><path d="M7 12h10M12 7v10" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>NexMind</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#docs">Docs</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#blog">Blog</a>
+      <a href="#signin" class="nav-cta">Start building</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Now available on GitHub &mdash; v2.4
+    </div>
+    <h1>Deploy <span>AI agents</span> that write, review, and ship production code</h1>
+    <p>NexMind gives every engineer on your team a fleet of specialized AI agents that understand your codebase, follow your conventions, and open real PRs.</p>
+    <div class="hero-actions">
+      <a href="#start" class="btn-primary">Start building free</a>
+      <a href="#demo" class="btn-ghost">Watch a demo</a>
+    </div>
+    <div class="hero-terminal">
+      <div class="hero-terminal-bar"><span></span><span></span><span></span></div>
+      <pre><span class="dim">$</span> <span class="cmd">nexmind init</span>
+<span class="dim">  Indexing 14,230 symbols across 847 files...</span>
+<span class="dim">  Graph ready. 6 specialized agents standing by.</span>
+<span class="prompt">$</span> <span class="cmd">nexmind agent plan</span> <span class="dim">"Add OAuth to the auth module"</span>
+<span class="dim">  Agent found 3 affected flows. Drafting plan...</span>
+<span class="dim">  Plan ready: 8 tasks, 4 files, est. 22 min.</span>
+<span class="dim">  PR #247 created → awaiting your review.</span>
+<span class="prompt">$</span> <span class="dim">▊</span></pre>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="container">
+    <p class="trust-label">Trusted by engineering teams at</p>
+    <div class="trust-logos">
+      <span>Vercel</span><span>Linear</span><span>Stripe</span><span>Notion</span><span>Figma</span>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="features">
+  <div class="container">
+    <p class="section-label">Core Platform</p>
+    <h2>Everything your agents <span>need</span> to ship safely</h2>
+    <p class="section-sub">Each agent comes pre-loaded with codebase context, testing workflows, and PR conventions specific to your team.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&darr;</div>
+        <h3>Semantic code graph</h3>
+        <p>Agents navigate your codebase using a real dependency graph, not fuzzy text search. Every symbol, every caller, every flow is indexed before the first prompt.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x2714;</div>
+        <h3>Verified PR workflow</h3>
+        <p>Every agent change goes through your existing CI: lint, typecheck, unit tests, integration tests. Failed checks mean the agent iterates until green.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&gt;</div>
+        <h3>Multi-agent orchestration</h3>
+        <p>One task spawns a planner, implementer, reviewer, and tester. They negotiate, hand off, and converge on a single clean PR — no merge-conflict chaos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x25CB;</div>
+        <h3>Convention-aware generation</h3>
+        <p>Teach agents your naming patterns, file structure, import style, and error handling idioms once. They never deviate, never invent their own conventions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x2318;</div>
+        <h3>CLI-first, IDE-optional</h3>
+        <p>Work from the terminal. Agents understand your shell, your git workflow, your monorepo layout. Zero clicks, zero context switching.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x2699;</div>
+        <h3>Blast radius analysis</h3>
+        <p>Before any change, agents trace upstream dependents and downstream callees. You see exactly what breaks before it breaks — annotated with risk levels.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="capabilities">
+  <div class="container">
+    <p class="section-label">Agent Capabilities</p>
+    <h2>Specialized agents <span>working</span> in parallel</h2>
+    <p class="section-sub">No single monolithic agent. A team of narrow, expert agents each owning one phase of the delivery pipeline.</p>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <div class="cap-icon">&#x25A1;</div>
+        <div>
+          <h3>Planner</h3>
+          <p>Decomposes features into tasks, maps affected symbols, estimates impact before a single file is touched. Outputs a reviewable plan in under 30 seconds.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">&#x25B3;</div>
+        <div>
+          <h3>Implementer</h3>
+          <p>Writes code following the plan, your conventions, and your design system. Runs tests locally. Iterates on failures. Never opens a PR that doesn't compile.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">&#x25C7;</div>
+        <div>
+          <h3>Reviewer</h3>
+          <p>Red-teams every diff: finds edge cases, security holes, missing tests, and convention violations. Comments inline like a senior engineer on their most paranoid day.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">&#x25C9;</div>
+        <div>
+          <h3>Tester</h3>
+          <p>Generates unit, integration, and E2E tests. Runs them against all affected flows. Fuzzes inputs. Every regression is a bug the tester caught before you merged.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">14,230</div>
+        <div class="stat-label">Symbols indexed per repo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">6</div>
+        <div class="stat-label">Specialized agent types</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">98.4%</div>
+        <div class="stat-label">CI pass rate on first PR</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4.2x</div>
+        <div class="stat-label">Faster cycle time</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="testimonial">
+      <blockquote>&ldquo;NexMind isn't just autocomplete on steroids. It's <span>six agents that negotiate with each other</span> before a single line lands in main. Our review bandwidth doubled overnight.&rdquo;</blockquote>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">LH</div>
+        <div>
+          <div class="testimonial-name">Linh Ha</div>
+          <div class="testimonial-role">Staff Engineer, Infra @ Notion</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>Give your team <span>AI agents</span> that actually ship</h2>
+    <p>Free for individuals. Team plans from $19/seat. No credit card required to start.</p>
+    <div class="cta-input-group">
+      <input type="email" placeholder="you@company.com" class="cta-input">
+      <a href="#start" class="btn-primary">Start building</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="#docs">Docs</a>
+      <a href="#changelog">Changelog</a>
+      <a href="#status">Status</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#terms">Terms</a>
+    </div>
+    <p class="footer-copy">&copy; 2026 NexMind Inc.</p>
+  </div>
+</footer>
+
+</body>
+</html>

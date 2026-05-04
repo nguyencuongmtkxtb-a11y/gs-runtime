@@ -138,9 +138,11 @@ if (-not $SkipOpenCodeConfig) {
     $ocDir = "$env:USERPROFILE\.config\opencode"
     $ocConfig = Join-Path $ocDir "config.json"
     $skillDir = Join-Path $ocDir "skills\gs"
+    $odSkillDir = Join-Path $ocDir "skills\od-bridge"
 
     New-Item -ItemType Directory -Force -Path $ocDir | Out-Null
     New-Item -ItemType Directory -Force -Path $skillDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $odSkillDir | Out-Null
 
     # MCP Config
     $config = @{}
@@ -157,11 +159,16 @@ if (-not $SkipOpenCodeConfig) {
     Write-Host "  ✓ MCP config written" -ForegroundColor Green
 
     # GS Skill
-    Write-Host "[7/7] Registering GS skill..." -ForegroundColor Cyan
+    Write-Host "[7/7] Registering GS + od-bridge skills..." -ForegroundColor Cyan
     $skillSrc = Join-Path $repoRoot "skills\gs\SKILL.md"
     if (Test-Path $skillSrc) {
         Copy-Item $skillSrc $skillDir -Force
         Write-Host "  ✓ GS skill registered" -ForegroundColor Green
+    }
+    $odSkillSrc = Join-Path $repoRoot "skills\od-bridge\SKILL.md"
+    if (Test-Path $odSkillSrc) {
+        Copy-Item $odSkillSrc $odSkillDir -Force
+        Write-Host "  ✓ od-bridge skill registered" -ForegroundColor Green
     }
 
     Write-Host ""

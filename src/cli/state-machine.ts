@@ -16,6 +16,11 @@ import {
 } from "../shared/state.js";
 import { analyze as gitnexusAnalyze, checkIndex, isAvailable as isGitNexusAvailable } from "../gitnexus/bridge.js";
 import { logger } from "../shared/logger.js";
+import { writeFileSync, existsSync, mkdirSync, readFileSync, copyFileSync } from "node:fs";
+import { join } from "node:path";
+import { buildAgentsMd } from "./context-injector.js";
+import { scaffoldProject } from "./scaffold.js";
+import { createInitialSession, loadSession, saveSession, updateSessionFromState, ensureSessionDir } from "../shared/session-state.js";
 import pc from "picocolors";
 
 export class StateMachine {
@@ -74,8 +79,30 @@ export class StateMachine {
       logger.log("warn", "GitNexus not found. Graph features disabled. Install: npm install -g gitnexus");
     }
 
+    const agentsPath = join(this.projectRoot, "AGENTS.md");
+    writeFileSync(agentsPath, buildAgentsMd(), "utf-8");
+    logger.log("success", "AGENTS.md generated with GS + Open Design rules.");
+
+    const scaffold = scaffoldProject(this.projectRoot, this.state.project);
+    if (scaffold.created.length > 0) {
+      logger.log("success", `Scaffolded ${scaffold.created.length} files:`);
+      for (const f of scaffold.created) {
+        logger.step(`  + ${f}`);
+      }
+    }
+    if (scaffold.skipped.length > 0) {
+      logger.log("info", `Skipped ${scaffold.skipped.length} existing files.`);
+    }
+
     logger.log("info", "GS initialized.");
     logger.log("info", 'Next: gs brainstorm "your feature description"');
+    ensureSessionDir(this.projectRoot);
+    const existingSession = loadSession(this.projectRoot);
+    const session = existingSession ?? createInitialSession(this.state.project);
+    session.phase = "idle";
+    session.lastAction = "gs init";
+    session.lastActionTime = new Date().toISOString();
+    saveSession(this.projectRoot, session);
     return { success: true, message: "GS initialized successfully" };
   }
 
@@ -97,6 +124,8 @@ export class StateMachine {
       };
     }
 
+    const isUITask = /ui|ux|web|design|landing|page|dashboard|mobile|component|css|style|layout|prototype|frontend|interface|screen|visual|theme/i.test(description);
+
     logger.section(`Phase: ${PHASE_LABELS[targetPhase]}`);
     logger.step(description);
     logger.step(PHASE_DESCRIPTIONS[targetPhase]);
@@ -105,10 +134,24 @@ export class StateMachine {
     logger.divider();
     logger.code("OpenCode will load 'gs' skill → brainstorm workflow");
     logger.code("Output required: .gs/design.md");
+    if (isUITask) {
+      logger.section("DESIGN TASK DETECTED — Open Design Required");
+      logger.code("1. Browse design systems visually: gs ui (http://127.0.0.1:3456)");
+      logger.code("2. Or query via MCP: gs_search_design_systems");
+      logger.code("3. Load chosen system: gs_load_design_system <name>");
+      logger.code("4. Compose prompt: gs_compose_design_prompt with skill + system");
+      logger.code("5. Pick matching skill: gs_list_design_skills");
+    }
     logger.code("MCP: gs_record_output → gs_propose_transition planning");
     logger.code("Then run: gs plan");
 
     this.persist();
+    updateSessionFromState(
+      createInitialSession(this.state.project),
+      this.state,
+      this.projectRoot,
+      "gs brainstorm",
+    );
     return { success: true, message: "Brainstorming phase started" };
   }
 
@@ -148,6 +191,12 @@ export class StateMachine {
     logger.code("Then run: gs implement");
 
     this.persist();
+    updateSessionFromState(
+      loadSession(this.projectRoot) ?? createInitialSession(this.state.project),
+      this.state,
+      this.projectRoot,
+      "gs plan",
+    );
     return { success: true, message: "Planning phase started" };
   }
 
@@ -198,6 +247,12 @@ export class StateMachine {
     logger.code("When done: gs review");
 
     this.persist();
+    updateSessionFromState(
+      loadSession(this.projectRoot) ?? createInitialSession(this.state.project),
+      this.state,
+      this.projectRoot,
+      "gs implement",
+    );
     return { success: true, message: "Implementation phase started" };
   }
 
@@ -235,6 +290,12 @@ export class StateMachine {
     logger.code("Then run: gs finish");
 
     this.persist();
+    updateSessionFromState(
+      loadSession(this.projectRoot) ?? createInitialSession(this.state.project),
+      this.state,
+      this.projectRoot,
+      "gs review",
+    );
     return { success: true, message: "Review phase started" };
   }
 
@@ -264,7 +325,24 @@ export class StateMachine {
     logger.divider();
     logger.log("success", "GS workflow complete!");
 
+    const planPath = join(this.projectRoot, ".gs", "plan.md");
+    if (existsSync(planPath)) {
+      const plansDir = join(this.projectRoot, "plans");
+      if (!existsSync(plansDir)) mkdirSync(plansDir, { recursive: true });
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").split("T")[0];
+      const archiveName = `${timestamp}-${this.state.project.toLowerCase().replace(/\s+/g, "-")}.md`;
+      const archivePath = join(plansDir, archiveName);
+      copyFileSync(planPath, archivePath);
+      logger.log("success", `Plan archived to plans/${archiveName}`);
+    }
+
     this.persist();
+    updateSessionFromState(
+      loadSession(this.projectRoot) ?? createInitialSession(this.state.project),
+      this.state,
+      this.projectRoot,
+      "gs finish",
+    );
     return { success: true, message: "Workflow finished" };
   }
 

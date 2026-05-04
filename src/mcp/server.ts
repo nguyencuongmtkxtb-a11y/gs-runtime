@@ -9,6 +9,12 @@ import {
 import { loadState, saveState, getNextPhase } from "../shared/state.js";
 import { checkIndex } from "../gitnexus/bridge.js";
 import { StateMachine } from "../cli/state-machine.js";
+import { loadSession, saveSession, updateSessionFromState, buildResumeContext } from "../shared/session-state.js";
+import { checkPrivacy, buildPrivacyPrompt } from "../hooks/privacy-block.js";
+import { checkScout } from "../hooks/scout-block.js";
+import { trackEditAndCheck } from "../hooks/post-edit-simplify.js";
+import { validatePlanFormat } from "../hooks/plan-format-validator.js";
+import { scanStagedFiles } from "../hooks/security-scan.js";
 import type { GSState, Phase, MCPWorkflowStatus, MCPFileCheckResult, MCPPreCommitResult, PlanTask } from "../shared/types.js";
 import { PHASE_LABELS, PHASE_DESCRIPTIONS } from "../shared/types.js";
 import { DESIGN_TOOL_DEFINITIONS, handleDesignTool } from "./design-tools.js";
@@ -138,12 +144,14 @@ export async function startMCPServer(): Promise<void> {
             };
           }
 
+          const session = loadSession(process.cwd());
           const status: MCPWorkflowStatus = {
             currentPhase: state.currentPhase,
             phaseStatus: state.phases[state.currentPhase].status,
             phases: state.phases,
             gitnexus: { indexed: state.gitnexus.indexed, stale: state.gitnexus.stale },
             instructions: PHASE_DESCRIPTIONS[state.currentPhase],
+            resumeContext: session ? buildResumeContext(process.cwd()) : null,
           };
 
           return {
@@ -166,6 +174,28 @@ export async function startMCPServer(): Promise<void> {
           const currentPhase = state.currentPhase;
           const filePath = (args as Record<string, unknown>).path as string;
           const operation = (args as Record<string, unknown>).operation as string;
+
+          if (operation === "read") {
+            const privacy = checkPrivacy(filePath);
+            if (privacy.blocked) {
+              return {
+                content: [{ type: "text", text: `@@PRIVACY_PROMPT_START@@\n${buildPrivacyPrompt(privacy)}\n@@PRIVACY_PROMPT_END@@` }],
+              };
+            }
+          }
+
+          const scout = checkScout(process.cwd(), filePath);
+          if (scout.blocked) {
+            return {
+              content: [{ type: "text", text: JSON.stringify({
+                allowed: false,
+                path: filePath,
+                phase: currentPhase,
+                reason: scout.reason,
+                planTask: null,
+              } as MCPFileCheckResult, null, 2) }],
+            };
+          }
 
           if (currentPhase === "brainstorming" && operation !== "read") {
             return {
@@ -206,6 +236,23 @@ export async function startMCPServer(): Promise<void> {
                 } as MCPFileCheckResult, null, 2) }],
               };
             }
+
+            let hookMessages: string[] = [];
+            if (operation === "write" || operation === "edit") {
+              const simplify = trackEditAndCheck(process.cwd());
+              if (simplify.shouldRemind) {
+                hookMessages.push(simplify.message);
+              }
+
+              const planCheck = validatePlanFormat(process.cwd(), filePath);
+              if (!planCheck.valid || planCheck.issues.length > 0) {
+                hookMessages.push(`Plan format issues: ${planCheck.issues.join("; ")}`);
+              }
+              if (planCheck.warnings.length > 0) {
+                hookMessages.push(`Plan warnings: ${planCheck.warnings.join("; ")}`);
+              }
+            }
+
             return {
               content: [{ type: "text", text: JSON.stringify({
                 allowed: true,
@@ -213,6 +260,7 @@ export async function startMCPServer(): Promise<void> {
                 phase: currentPhase,
                 reason: `File is part of plan task: ${matchingTask.description}`,
                 planTask: matchingTask,
+                hooks: hookMessages.length > 0 ? hookMessages : undefined,
               } as MCPFileCheckResult, null, 2) }],
             };
           }
@@ -235,6 +283,7 @@ export async function startMCPServer(): Promise<void> {
               issues: ["GS not initialized"],
               gitnexusImpact: null,
               testsStatus: "unknown",
+              security: null,
             } as MCPPreCommitResult, null, 2) }] };
           }
 
@@ -244,14 +293,34 @@ export async function startMCPServer(): Promise<void> {
               issues: [`Commits only allowed in implementing/reviewing/finishing phases. Current: ${PHASE_LABELS[state.currentPhase]}`],
               gitnexusImpact: null,
               testsStatus: "unknown",
+              security: null,
             } as MCPPreCommitResult, null, 2) }] };
           }
 
+          const securityScan = scanStagedFiles(process.cwd());
+          const issues: string[] = [];
+          if (!securityScan.passed) {
+            for (const f of securityScan.findings.filter((f) => f.severity === "critical")) {
+              issues.push(`[CRITICAL] ${f.file}:${f.line} — ${f.message}: ${f.snippet}`);
+            }
+          }
+          for (const f of securityScan.findings.filter((f) => f.severity === "high")) {
+            issues.push(`[HIGH] ${f.file}:${f.line} — ${f.message}`);
+          }
+
           return { content: [{ type: "text", text: JSON.stringify({
-            ready: true,
-            issues: [],
+            ready: securityScan.passed,
+            issues,
             gitnexusImpact: null,
             testsStatus: "unknown",
+            security: {
+              scanned: true,
+              totalFindings: securityScan.findings.length,
+              critical: securityScan.findings.filter((f) => f.severity === "critical").length,
+              high: securityScan.findings.filter((f) => f.severity === "high").length,
+              medium: securityScan.findings.filter((f) => f.severity === "medium").length,
+              summary: securityScan.summary,
+            },
           } as MCPPreCommitResult, null, 2) }] };
         }
 
@@ -313,6 +382,14 @@ export async function startMCPServer(): Promise<void> {
           }
           task.status = "completed";
           saveState(state);
+          const session = loadSession(process.cwd());
+          if (session) {
+            session.planTasks = state.plan.tasks.map((t) => ({ id: t.id, description: t.description, status: t.status }));
+            session.completedTasks = state.plan.tasks.filter((t) => t.status === "completed").map((t) => t.id);
+            session.lastAction = `task_complete:${taskId}`;
+            session.lastActionTime = new Date().toISOString();
+            saveSession(process.cwd(), session);
+          }
           return {
             content: [{ type: "text", text: JSON.stringify({
               success: true,

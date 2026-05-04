@@ -1,80 +1,83 @@
 ---
 name: od-bridge
-description: Bridge between GS workflow phases and Open Design skills/systems
+description: MANDATORY Open Design bridge for GS — integrates 59 design skills + 137 design systems into the GS workflow. Use for ANY UI/frontend/visual task in every GS phase.
 mode: prototype
 scenario: design
 ---
 
-# OD Bridge — Open Design Integration for GS
+# OD Bridge — Open Design Integration for GS (MANDATORY)
 
-Maps GS workflow phases to Open Design capabilities. Use when UI/UX design tasks are needed during any GS phase.
+GS now includes Open Design as a HARD REQUIREMENT — on par with `gs_check_file` and `gs_pre_commit`. For any task involving UI, frontend, visuals, presentations, or client-facing output, you MUST use the design tools below. No exceptions.
 
-## Available Design Skills (57)
+## MANDATORY Usage by Phase
 
-Skills are in `integrations/open-design/skills/`. Load a skill by reading its SKILL.md.
+| Phase | Non-negotiable Action |
+|-------|----------------------|
+| brainstorming | `gs_list_design_skills` → `gs_search_design_systems` → `gs_compose_design_prompt` (discovery) |
+| planning | `gs_load_design_system` → extract tokens → reference in every UI task |
+| implementing | `gs_compose_design_prompt` → use ONLY design system tokens — ZERO ad-hoc CSS |
+| reviewing | `gs_compose_design_prompt` (critique mode) → verify colors/fonts/spacing match DESIGN.md |
 
-### By GS Phase
+## CRITICAL Design Rules (ZERO exceptions)
 
-| GS Phase | Recommended Skills |
-|----------|-------------------|
-| brainstorming | `wireframe-sketch`, `design-brief`, `critique` |
-| planning | `pm-spec`, `team-okrs`, `kanban-board` |
-| implementing | `web-prototype`, `dashboard`, `mobile-app`, `saas-landing`, `mobile-onboarding`, `pricing-page`, `docs-page`, `blog-post`, `email-marketing` |
-| reviewing | `critique`, `tweaks` |
-| finishing | `finance-report`, `meeting-notes`, `invoice`, `eng-runbook`, `hr-onboarding` |
+1. **NEVER write a single line of CSS without first loading a design system**
+2. **NEVER use ad-hoc hex colors, font sizes, or spacing — ONLY design system tokens**
+3. **NEVER use "Lorem ipsum" — all copy must be real and contextual**
+4. **All design output is verified against the loaded DESIGN.md in the review phase**
 
-### By Scenario
+## Design Skills (59 across 12 scenarios)
 
-- **design**: web-prototype, mobile-app, mobile-onboarding, wireframe-sketch, critique, tweaks, design-brief
-- **marketing**: saas-landing, blog-post, email-marketing, social-carousel, magazine-poster, motion-frames, sprite-animation, digital-eguide
-- **operation**: dashboard, meeting-notes, kanban-board
-- **engineering**: docs-page, eng-runbook
-- **product**: pm-spec, team-okrs
-- **finance**: finance-report, invoice
-- **hr**: hr-onboarding
-- **sale**: pricing-page
-- **personal**: gamified-app, dating-web, hatch-pet
+Skills live in `integrations/open-design/skills/`. Key skills by GS phase:
 
-### Deck Mode (presentations)
-`guizang-ppt` (default), `simple-deck`, `replit-deck`, `weekly-update`
+### brainstorming
+`wireframe-sketch` (hand-drawn wireframes), `design-brief` (design requirements), `image-poster` (visual concepts)
 
-## Available Design Systems (129)
+### planning
+`pm-spec` (PRD writing), `team-okrs` (OKR tracking), `kanban-board` (task visualization)
 
-Design systems are in `integrations/open-design/design-systems/`. Each is a `DESIGN.md` file.
+### implementing
+`web-prototype` (landing pages, full websites), `dashboard` (data dashboards), `mobile-app` (mobile UI), `saas-landing` (SaaS marketing pages), `pricing-page` (pricing tiers), `docs-page` (documentation sites), `blog-post` (blog layouts), `email-marketing` (email templates), `mobile-onboarding` (app onboarding flows)
 
-### MCP Tools
-- `gs_list_design_skills` — list all 57 skills grouped by scenario
-- `gs_load_design_system <name>` — load a specific design system
-- `gs_search_design_systems <keyword>` — search by name/category
-- `gs_detect_agents` — detect available CLI agents
-- `gs_compose_design_prompt <params>` — compose design prompt with active system + skill
+### reviewing
+`critique` (5-dimension design review: philosophy, hierarchy, detail, function, innovation), `tweaks` (live theme adjustment panel)
 
-### How to Use
+### finishing
+`finance-report`, `meeting-notes`, `invoice`, `eng-runbook`, `hr-onboarding`
 
-1. **Start design task**: Call `gs_list_design_skills` to see available skills
-2. **Pick a design system**: Call `gs_load_design_system "linear-app"` (or any brand)
-3. **Load skill**: Use the Skill tool with path `integrations/open-design/skills/<name>/SKILL.md`
-4. **Compose prompt**: Call `gs_compose_design_prompt` with skill + design system + project metadata
-5. **Generate artifact**: Agent produces HTML/CSS artifact using the loaded context
+### Deck/Presentation mode (28 exotic themes)
+`html-ppt` (general), `html-ppt-pitch-deck`, `html-ppt-tech-sharing`, `html-ppt-product-launch`, `html-ppt-weekly-report`, `html-ppt-xhs-post`, `html-ppt-course-module`, `html-ppt-presenter-mode`, `html-ppt-dir-key-nav-minimal`, `html-ppt-xhs-pastel-card`, `html-ppt-xhs-white-editorial`, `html-ppt-graphify-dark-graph`, `html-ppt-knowledge-arch-blueprint`, `html-ppt-hermes-cyber-terminal`, `html-ppt-obsidian-claude-gradient`, `html-ppt-testing-safety-alert`, `guizang-ppt` (magazine-style), `simple-deck`, `replit-deck`, `weekly-update`
 
-### Design Systems by Category
+## Design Systems (137 across 19 categories)
 
-- **AI & LLM**: claude, cohere, elevenlabs, minimax, mistral-ai, ollama, openai, opencode-ai, replicate, runwayml, together-ai, voltagent, x-ai
-- **Developer Tools**: cursor, expo, lovable, raycast, superhuman, vercel, warp
-- **Productivity**: cal, intercom, linear-app, mintlify, notion, resend, zapier
-- **Backend & Data**: clickhouse, composio, hashicorp, mongodb, posthog, sanity, sentry, supabase
-- **Design & Creative**: airtable, clay, figma, framer, miro, webflow
-- **Fintech**: binance, coinbase, kraken, mastercard, revolut, stripe, wise
-- **E-Commerce**: airbnb, meta, nike, shopify, starbucks
-- **Consumer**: apple, ibm, nvidia, pinterest, playstation, spacex, spotify, theverge, uber, vodafone, wired, xiaohongshu
-- **Automotive**: bmw, bugatti, ferrari, lamborghini, renault, tesla
+Systems live in `integrations/open-design/design-systems/`. Top systems by category:
 
-### Design Systems by Style
-`default` (Neutral Modern), `warm-editorial` (Warm Editorial), `kami` (Editorial paper), `brutalism`, `neobrutalism`, `glassmorphism`, `claymorphism`, `neumorphism`, `minimal`, `modern`, `corporate`, `elegant`, `luxury`, `bold`, `flat`, `material`, `mono`, `gradient`, `neon`, `dithered`, `doodle`, `futuristic`, `artistic`, `fantasy`, `cosmic`, `dramatic`, `expressive`, `friendly`, `clean`, `creative`, `colorful`, `energetic`, `refined`, `contemporary`, `professional`, `enterprise`, `editorial`, `publication`, `perspective`, `bento`, `levels`
+- **AI & LLM**: claude, openai, cohere, mistral-ai, elevenlabs, minimax, ollama, replicate, runwayml, together-ai, voltagent, x-ai, opencode-ai
+- **Developer Tools**: vercel, cursor, expo, lovable, raycast, superhuman, warp
+- **Productivity**: linear-app, notion, cal, intercom, mintlify, resend, zapier
+- **Fintech**: stripe, binance, coinbase, kraken, mastercard, revolut, wise
+- **Design**: figma, framer, airtable, clay, miro, webflow
+- **Consumer**: apple, nvidia, spacex, spotify, uber, pinterest, playstation, ibm, meta
+- **E-Commerce**: shopify, nike, airbnb, starbucks
+- **Backend**: supabase, sentry, mongodb, clickhouse, hashicorp, posthog, sanity
+- **Automotive**: tesla, bmw, ferrari, lamborghini, bugatti
+- **Media**: wired, theverge, xiaohongshu
 
-### Anti-Slop Checklist (always apply)
-- No generic placeholder text
-- Colors must come from active design system
-- Fonts must be from curated stack
-- Brand consistency across all elements
-- All copy contextual and relevant
+## MCP Design Tools
+
+| Tool | Purpose | Required in Phase |
+|------|---------|-------------------|
+| `gs_list_design_skills` | List 59 skills by scenario | brainstorming |
+| `gs_search_design_systems` | Search 137 systems by keyword | brainstorming |
+| `gs_coad_design_system` | Load full DESIGN.md with tokens | planning |
+| `gs_detect_agents` | Detect CLI agents on PATH | any (recommended) |
+| `gs_compose_design_prompt` | Compose prompt with system + skill + anti-slop | all phases |
+
+## Anti-Slop Checklist (always apply)
+
+- [ ] NO generic placeholder text ("Lorem ipsum", "Content goes here")
+- [ ] ALL colors come from the loaded design system (no ad-hoc hex)
+- [ ] ALL fonts are from the curated font stack (no system defaults)
+- [ ] Brand consistency maintained across every element
+- [ ] All copy is contextual and relevant to the brief
+- [ ] No generic stock photo descriptions
+- [ ] Every element has a clear purpose — no decorative-only elements

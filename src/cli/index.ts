@@ -164,4 +164,68 @@ program
     await startMCPServer();
   });
 
+program
+  .command("ui")
+  .description("Open the Open Design Web UI (design system browser + project workspace)")
+  .option("-p, --port <port>", "Daemon port", "7456")
+  .option("--web-port <port>", "Web UI port", "3456")
+  .option("--no-open", "Don't open browser automatically")
+  .action(async (opts) => {
+    const { spawn } = await import("node:child_process");
+    const { existsSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const { logger } = await import("../shared/logger.js");
+
+    const odRoot = join(import.meta.dirname ?? process.cwd(), "..", "integrations", "open-design");
+    const daemonPath = join(odRoot, "apps", "daemon", "dist", "cli.js");
+    const webDir = join(odRoot, "apps", "web");
+
+    if (!existsSync(daemonPath)) {
+      logger.log("error", "Open Design daemon not built. Run: cd integrations/open-design && pnpm install && pnpm --filter @open-design/daemon build");
+      process.exit(1);
+    }
+
+    if (!existsSync(join(webDir, "node_modules"))) {
+      logger.log("error", "Open Design dependencies not installed. Run: cd integrations/open-design && pnpm install");
+      process.exit(1);
+    }
+
+    logger.log("info", "Starting Open Design Web UI...");
+    logger.step(`Daemon: http://127.0.0.1:${opts.port}`);
+    logger.step(`Web UI: http://127.0.0.1:${opts.webPort}`);
+
+    const daemon = spawn("node", [daemonPath, "--port", opts.port], {
+      cwd: odRoot,
+      stdio: "inherit",
+      env: { ...process.env, OD_PORT: opts.port },
+    });
+
+    const web = spawn("npx", ["next", "dev", "--port", opts.webPort], {
+      cwd: webDir,
+      stdio: "inherit",
+      env: { ...process.env, OD_PORT: opts.port, PORT: opts.webPort },
+    });
+
+    if (!opts.open) {
+      logger.log("info", `Open http://127.0.0.1:${opts.webPort} in your browser.`);
+    } else {
+      const { execSync } = await import("node:child_process");
+      try {
+        execSync(`start http://127.0.0.1:${opts.webPort}`, { timeout: 3000 });
+      } catch {}
+    }
+
+    process.on("SIGINT", () => {
+      daemon.kill();
+      web.kill();
+      process.exit(0);
+    });
+
+    process.on("SIGTERM", () => {
+      daemon.kill();
+      web.kill();
+      process.exit(0);
+    });
+  });
+
 program.parse(process.argv);

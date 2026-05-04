@@ -1,6 +1,6 @@
 # GS Rules - MANDATORY
 
-This project uses **GS Runtime** which combines Superpowers workflow methodology with GitNexus codebase graph intelligence.
+This project uses GS Runtime which combines Superpowers workflow methodology with GitNexus codebase graph intelligence.
 
 ## Core Rule
 
@@ -60,6 +60,11 @@ Fall back to `grep` and file reads only when GitNexus is unavailable.
 | `gs_propose_transition` | Phase work complete | YES |
 | `gs_complete_task` | After each plan task | During implement |
 | `gs_record_output` | Phase output created | YES |
+| `gs_list_design_skills` | UI task — brainstorming phase | YES (UI) |
+| `gs_search_design_systems` | UI task — brainstorming phase | YES (UI) |
+| `gs_load_design_system` | UI task — planning phase | YES (UI) |
+| `gs_compose_design_prompt` | UI task — all phases | YES (UI) |
+| `gs_detect_agents` | Design task — any phase | Recommended |
 
 ## Prohibited Actions
 
@@ -70,34 +75,39 @@ Fall back to `grep` and file reads only when GitNexus is unavailable.
 - ❌ Modifying unplanned files during implementation
 - ❌ Skipping phases
 - ❌ Claiming completion without `gs_propose_transition`
+- ❌ Writing CSS/styling without first loading a design system via `gs_load_design_system`
+- ❌ Using ad-hoc hex colors, font sizes, or spacing — design system tokens ONLY
+- ❌ Using "Lorem ipsum" or generic placeholder copy in any design output
+- ❌ Generating UI code without first calling `gs_compose_design_prompt`
 
-## Open Design Integration
+## Open Design Integration — MANDATORY
 
-This project integrates **Open Design** (https://github.com/nexu-io/open-design) as a submodule at `integrations/open-design/`.
+This project integrates **Open Design** as a submodule at `integrations/open-design/`.
 
-### Available Design Capabilities
+### MANDATORY Usage Rules
 
-- **57 Design Skills** in `integrations/open-design/skills/` — web prototypes, mobile apps, dashboards, presentations, marketing materials
-- **129 Design Systems** in `integrations/open-design/design-systems/` — brand-grade DESIGN.md files (Linear, Stripe, Vercel, Apple, etc.)
-- **Agent Detection** — scan PATH for 13 CLI agents to use as design engines
-- **Prompt Stack** — discovery forms, critique checklists, anti-slop rules
+| Phase | Mandatory Action |
+|-------|-----------------|
+| brainstorming (UI tasks) | `gs_list_design_skills` → `gs_search_design_systems` → `gs_compose_design_prompt` (discovery) |
+| planning (UI tasks) | `gs_load_design_system` → get all tokens → reference in every UI task |
+| implementing (UI tasks) | `gs_compose_design_prompt` → use ONLY design system tokens — NO ad-hoc CSS |
+| reviewing (UI tasks) | `gs_compose_design_prompt` (critique mode) → verify colors/fonts/spacing match |
+
+### CRITICAL Design Rules (ZERO exceptions)
+- **NEVER write a single line of CSS without first loading a design system**
+- **NEVER use ad-hoc hex colors, font sizes, or spacing — ONLY design system tokens**
+- **NEVER use "Lorem ipsum" — all copy must be real and contextual**
+- **All design output is verified against the loaded DESIGN.md in the review phase**
 
 ### MCP Design Tools
 
 | Tool | Purpose |
 |------|---------|
-| `gs_list_design_skills` | List all 57 skills grouped by scenario |
+| `gs_list_design_skills` | List all 59 skills grouped by scenario |
 | `gs_load_design_system` | Load a DESIGN.md by name |
 | `gs_search_design_systems` | Search design systems by keyword |
 | `gs_detect_agents` | Detect available CLI agents on PATH |
 | `gs_compose_design_prompt` | Compose design prompt with system + skill |
-
-### When to Use Design Skills
-
-- **brainstorming**: Use `wireframe-sketch` for quick visual ideation
-- **implementing**: Use `web-prototype`, `dashboard`, `mobile-app` for UI tasks
-- **reviewing**: Use `critique` for 5-dimensional design review
-- Load the `od-bridge` skill for full integration details
 
 ## Violation Consequences
 

@@ -43,13 +43,12 @@ export function createInitialState(projectName?: string): GSState {
     };
   }
   phaseMap.idle.status = "completed";
-  phaseMap.brainstorming.status = "in_progress";
-  phaseMap.brainstorming.startedAt = now;
+  phaseMap.idle.startedAt = now;
 
   return {
     version: "1.0.0",
     project: projectName ?? "unknown",
-    currentPhase: "brainstorming",
+    currentPhase: "idle",
     proposedPhase: null,
     phases: phaseMap,
     gitnexus: {

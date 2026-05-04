@@ -1,0 +1,32 @@
+# GS Scout Ignore — directories blocked from agent access
+# These are high-noise, low-value directories.
+# Add project-specific patterns below.
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Version control internals
+.git/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# GS Runtime internals
+.gs/
+
+# Cache
+.cache/
+.turbo/

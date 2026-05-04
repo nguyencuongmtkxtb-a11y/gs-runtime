@@ -1,0 +1,2169 @@
+{
+  "tier": "1-static",
+  "timestamp": "2026-05-04T03:11:54.569Z",
+  "total": 360,
+  "passed": 355,
+  "failed": 5,
+  "results": [
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: gs"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode/scenario",
+      "passed": true,
+      "message": "Design skill (no mode required)"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": false,
+      "message": "Contains Lorem ipsum placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: od-bridge"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": false,
+      "message": "Contains Lorem ipsum placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: audio-jingle"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: audio"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: blog-post"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": false,
+      "message": "Contains Lorem ipsum placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: critique"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: dashboard"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: operations"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: dating-web"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: personal"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: design-brief"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: design-system"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: planning"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: digital-eguide"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: docs-page"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: email-marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: eng-runbook"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: finance-report"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: finance"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: gamified-app"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: personal"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: magazine-web-ppt"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: hatch-pet"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: image"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: personal"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: hr-onboarding"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: hr"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-course-module"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: education"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-dir-key-nav-minimal"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: personal"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-graphify-dark-graph"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-hermes-cyber-terminal"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-knowledge-arch-blueprint"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-obsidian-claude-gradient"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-pitch-deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: finance"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-presenter-mode"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-product-launch"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-taste-brutalist"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode/scenario",
+      "passed": true,
+      "message": "Design skill (no mode required)"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-taste-editorial"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode/scenario",
+      "passed": true,
+      "message": "Design skill (no mode required)"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-tech-sharing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-testing-safety-alert"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-weekly-report"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: operations"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-xhs-pastel-card"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: personal"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-xhs-post"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: html-ppt-xhs-white-editorial"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: hyperframes"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: video"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: video"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: image-poster"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: image"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: invoice"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: finance"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: kanban-board"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: operations"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: magazine-poster"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": false,
+      "message": "Contains Lorem ipsum placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: meeting-notes"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: operations"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: mobile-app"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: mobile-onboarding"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: motion-frames"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: pm-spec"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: product"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: pptx-html-fidelity-audit"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: utility"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: engineering"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: pricing-page"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: sales"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: replit-deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: product"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: saas-landing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": false,
+      "message": "Contains Lorem ipsum placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: simple-deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: product"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: social-carousel"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: sprite-animation"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: team-okrs"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: product"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: tweaks"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: video-shortform"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: video"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: marketing"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: web-prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: web-prototype-taste-brutalist"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode/scenario",
+      "passed": true,
+      "message": "Design skill (no mode required)"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: web-prototype-taste-editorial"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode/scenario",
+      "passed": true,
+      "message": "Design skill (no mode required)"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: web-prototype-taste-soft"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode/scenario",
+      "passed": true,
+      "message": "Design skill (no mode required)"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: weekly-update"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: deck"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: operations"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "frontmatter",
+      "passed": true,
+      "message": "Valid YAML frontmatter"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "name",
+      "passed": true,
+      "message": "name: wireframe-sketch"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "description",
+      "passed": true,
+      "message": "Has description"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "mode",
+      "passed": true,
+      "message": "Valid mode: prototype"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "scenario",
+      "passed": true,
+      "message": "Valid scenario: design"
+    },
+    {
+      "file": "SKILL.md",
+      "test": "no-lorem",
+      "passed": true,
+      "message": "No placeholder text"
+    }
+  ]
+}
