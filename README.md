@@ -8,106 +8,105 @@ GS is a unified development runtime that combines three pillars into one enforce
 | **GitNexus** | Codebase graph intelligence (blast radius, execution flows, dependency analysis) |
 | **Open Design** | Design system integration (59 skills, 137 design systems, mandatory token usage) |
 
+## Quick Start
+
+```bash
+cd your-project
+gs init           # One-time setup. That's it.
+
+# Open OpenCode, tell agent what to do:
+# "Add OAuth2 login with Google"
+# "Fix the null pointer in auth middleware"
+# Agent handles the entire workflow automatically.
+```
+
+**No other terminal commands needed.** Agent starts workflows, transitions phases, and finishes — all via MCP.
+
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│  User → gs CLI (orchestrator)                    │
-│  Only way to interact with the workflow          │
-├─────────────────────────────────────────────────┤
-│  State Machine:                                  │
-│  idle → brainstorm → plan → implement            │
-│          → review → finish → completed           │
-├─────────────────────────────────────────────────┤
-│  MCP Server (gatekeeper + design tools):          │
-│  - gs_workflow_status: returns current phase     │
-│  - gs_check_file: validates file operations      │
-│  - gs_pre_commit: pre-commit validation          │
-│  - gs_inject_context: GitNexus graph context     │
-│  - gs_propose_transition: phase transition       │
-│  - gs_list_design_skills: 59 design skills       │
-│  - gs_load_design_system: 137 DESIGN.md tokens   │
-│  - gs_search_design_systems: find by keyword     │
-│  - gs_detect_agents: 13 CLI agents               │
-│  - gs_compose_design_prompt: skill + system      │
-├─────────────────────────────────────────────────┤
-│  GitNexus Bridge:                                │
-│  - Auto-index on phase start                     │
-│  - Graph context injection                       │
-│  - Impact analysis for code review               │
-│  - Change detection for commits                  │
-├─────────────────────────────────────────────────┤
-│  Open Design Module:                             │
-│  - 59 design skills (12 scenarios)               │
-│  - 137 design systems (19 categories)            │
-│  - Agent detection (13 CLI agents)               │
-│  - Prompt composition (anti-slop enforced)       │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  Terminal: gs init (one-time)                         │
+├─────────────────────────────────────────────────────┤
+│  OpenCode Agent (handles everything after init):     │
+│                                                      │
+│  gs_start_workflow → brainstorm → plan → implement   │
+│                      → review → finish               │
+├─────────────────────────────────────────────────────┤
+│  MCP Server (gatekeeper):                            │
+│  - gs_workflow_status: current phase + instructions  │
+│  - gs_start_workflow: begin full/quick workflow       │
+│  - gs_check_file: validates write operations         │
+│  - gs_pre_commit: security scan before commits       │
+│  - gs_propose_transition: auto phase transition      │
+│  - gs_register_task: explicit task registration      │
+│  - gs_complete_task: mark tasks done                 │
+│  - gs_record_output: mark phase complete             │
+│  - gs_inject_context: GitNexus graph hints           │
+│  + 5 Open Design tools (list, load, search,          │
+│    detect agents, compose prompt)                    │
+├─────────────────────────────────────────────────────┤
+│  GitNexus Bridge (orchestration-only):               │
+│  - Auto-index on phase start                         │
+│  - Actual queries via GitNexus's own MCP server      │
+├─────────────────────────────────────────────────────┤
+│  Open Design Module:                                 │
+│  - 59 design skills (12 scenarios)                   │
+│  - 137 design systems (19 categories)                │
+│  - Prompt composition (anti-slop enforced)           │
+└─────────────────────────────────────────────────────┘
 ```
 
-## Installation (máy mới hoàn toàn)
+## How It Works
 
-### Cách 1: Tự động (Windows) — 1 lệnh
+1. **User** runs `gs init` once in terminal
+2. **User** opens OpenCode and describes what they want
+3. **Agent** calls `gs_start_workflow` — picks `full` or `quick` mode automatically
+4. **Agent** executes the workflow end-to-end, transitioning phases via MCP
+5. **MCP server** enforces rules: no code during brainstorm, security scan before commits, plan task gate during implement
+
+### Two Modes
+
+| Mode | When | What happens |
+|------|------|--------------|
+| **full** | Complex features, multi-file changes | brainstorm → plan → implement → review → finish |
+| **quick** | Bug fixes, small refactors, < 5 min tasks | Straight to implementing, relaxed rules |
+
+The agent decides which mode based on the user's request complexity.
+
+## Installation
+
+### Automatic (Windows) — 1 command
 ```powershell
-git clone https://github.com/nguyencuongmtkxtb-a11y/gs-runtime.git
-cd gs
+git clone --recurse-submodules https://github.com/nguyencuongmtkxtb-a11y/gs-runtime.git
+cd gs-runtime
 powershell -ExecutionPolicy Bypass -File .\scripts\install-full.ps1
 ```
-Script tự động 7 bước:
-1. Check Node.js >= 18
-2. Clone/setup GS repo
-3. **Cài Superpowers skills** (từ github.com/obra/superpowers)
-4. npm install + build + npm link
-5. Cài GitNexus (graph context)
-6. Config OpenCode (MCP servers)
-7. Register GS + od-bridge skills
 
-### Cách 2: Từng bước thủ công
+### Manual steps
 
 ```bash
-# 0. Prerequisites
-#    - Node.js >= 18
-#    - OpenCode (opencode.ai)
-#    - Git
+# Prerequisites: Node.js >= 18, OpenCode, Git
 
-# 1. Cài Superpowers skills
+# 1. Install Superpowers skills
 git clone --depth 1 https://github.com/obra/superpowers.git /tmp/sp
 cp -r /tmp/sp/skills/* ~/.config/opencode/skills/
 rm -rf /tmp/sp
 
-# 2. Clone + cài GS (includes Open Design submodule)
+# 2. Clone + install GS (includes Open Design submodule)
 git clone --recurse-submodules https://github.com/nguyencuongmtkxtb-a11y/gs-runtime.git
-cd gs
+cd gs-runtime
 npm install && npm run build && npm link
 
-# 3. Cài GitNexus (graph context - tùy chọn)
+# 3. Install GitNexus (optional — graph intelligence)
 npm install -g gitnexus@1.6.4-rc.48
 
-# 4. Config OpenCode + deploy skills
+# 4. Deploy skills + config
 mkdir -p ~/.config/opencode/skills/gs
 cp skills/gs/SKILL.md ~/.config/opencode/skills/gs/SKILL.md
 mkdir -p ~/.config/opencode/skills/od-bridge
 cp skills/od-bridge/SKILL.md ~/.config/opencode/skills/od-bridge/SKILL.md
-gs config  # copy output vào ~/.config/opencode/config.json
-```
-
-### Sau khi cài: dùng trong project
-
-```bash
-cd your-project
-gs init                    # Khởi tạo GS
-gs brainstorm "your feature"  # CHỈ 1 LẦN - mọi thứ khác tự động qua MCP
-
-# Sau đó mở OpenCode, agent tự quản lý toàn bộ workflow:
-# brainstorm → plan → implement → review → finish
-# Có thể rollback: review → implement (sửa bug) → review
-```
-
-### Cập nhật
-```bash
-cd gs
-git pull --recurse-submodules
-npm run build
+gs config  # Copy output into ~/.config/opencode/config.json
 ```
 
 ### Configure OpenCode
@@ -120,91 +119,77 @@ Add to `~/.config/opencode/config.json`:
       "type": "local",
       "command": ["gs", "mcp-start"]
     }
-  },
-  "plugin": ["gs@git+https://github.com/user/gs.git"]
+  }
 }
 ```
 
-Or just run:
-```bash
-gs config
-```
-And copy the output into your OpenCode config.
+## Usage in Your Project
 
-### Initialize in your project
 ```bash
 cd your-project
-gs init
-gs agents-md    # Creates AGENTS.md with mandatory rules
+gs init    # Done. Go to OpenCode.
 ```
 
-## Usage
+Then in OpenCode, just describe your task naturally:
+- "Add user authentication with OAuth2 and refresh tokens"
+- "Fix the race condition in the payment webhook handler"
+- "Redesign the settings page" (agent will detect UI task)
 
-### Full Workflow
-```bash
-gs brainstorm "Add user authentication with OAuth2"
-# Go to OpenCode → agent follows brainstorming workflow
-# Agent creates design doc → proposes transition
+### Optional CLI Commands
 
-gs plan
-# Go to OpenCode → agent creates implementation plan
-# Agent analyzes blast radius with GitNexus
+These are available if you want manual control, but **not required**:
 
-gs implement
-# Go to OpenCode → agent executes TDD cycle
-# Each file op validated, each commit checked
-
-gs review
-# Go to OpenCode → agent reviews with GitNexus impact + Open Design critique
-
-gs finish
-# Final checks, cleanup, merge prep
-```
-
-### Commands
 | Command | Description |
 |---------|-------------|
-| `gs init` | Initialize GS in project |
-| `gs brainstorm <desc>` | Start brainstorming phase |
-| `gs plan` | Start planning phase |
-| `gs implement` | Start implementation phase |
-| `gs review` | Start code review phase |
-| `gs finish` | Finish the workflow |
+| `gs init` | Initialize GS in project (required, one-time) |
 | `gs status` | Show current workflow status |
 | `gs reset` | Reset all workflow state |
+| `gs quick <desc>` | Force quick mode from terminal |
+| `gs brainstorm [--ui] <desc>` | Force full mode from terminal |
+| `gs plan` | Manually start planning phase |
+| `gs implement` | Manually start implementation phase |
+| `gs review` | Manually start review phase |
+| `gs finish` | Manually finish workflow |
 | `gs index` | Force GitNexus re-indexing |
 | `gs config` | Show OpenCode MCP config |
-| `gs agents-md` | Generate AGENTS.md |
-| `gs mcp-start` | Start MCP server (called by OpenCode) |
+| `gs ui` | Open Design web UI browser |
 
-## How Enforcement Works
+## Enforcement Layers
 
-GS enforces the workflow through three layers:
+1. **MCP Server** — blocks unauthorized operations (writes during brainstorm, unplanned files during implement, commits without security scan)
+2. **System Instructions** — AGENTS.md + gs skill guide agent behavior
+3. **Hooks** — privacy block, scout block, security scan, edit-simplify reminder, plan format validator
 
-1. **CLI Gatekeeper**: Users can only start phases in order. The CLI validates state before allowing transitions.
+If agent "forgets" rules → MCP rejects the operation.
+If MCP is bypassed → system instructions prevent it.
 
-2. **MCP Server**: Every file operation must be validated. `gs_check_file` blocks writes during brainstorming/planning. `gs_pre_commit` blocks commits outside implementing phase. Open Design tools enforce `gs_compose_design_prompt` before any UI code.
+## Open Design (UI Tasks)
 
-3. **System Instructions**: AGENTS.md and the gs/od-bridge skills embed mandatory rules into every conversation. The agent is instructed to call MCP tools before any action — including design system loading before any CSS.
+When `--ui` flag is passed (or agent detects UI task), Open Design enforcement activates:
 
-Even if the AI agent "forgets" to follow rules, the MCP server will reject unauthorized operations. Even if the MCP server is bypassed, the CLI will reject phase transitions with incomplete work.
+- **59 design skills** for prototypes, dashboards, mobile, presentations
+- **137 design systems** with full DESIGN.md tokens (Linear, Stripe, Apple, etc.)
+- **Mandatory**: all CSS colors, fonts, spacing from loaded design system
+- **Anti-slop**: no Lorem ipsum, no ad-hoc hex values
 
-## Open Design — Third Pillar
+## Testing
 
-GS integrates Open Design as a first-class pillar alongside Superpowers and GitNexus:
+```bash
+npm test           # Run unit tests (vitest)
+npm run typecheck  # TypeScript check
+npm run build      # Build to dist/
+```
 
-- **59 design skills** cover web prototypes, mobile apps, dashboards, presentations, marketing materials, and more
-- **137 design systems** provide brand-grade DESIGN.md tokens (Linear, Stripe, Vercel, Apple, etc.)
-- **5 MCP tools** expose design capabilities to the agent (list, search, load, detect, compose)
-- **Mandatory token usage**: CSS colors, fonts, spacing MUST come from the loaded design system
-- **Anti-slop enforced**: no Lorem ipsum, no ad-hoc hex, no system defaults
+## State & Persistence
 
-## State Persistence
+- Local: `.gs/state.json` (per-project)
+- Global: `~/.gs/project-<name>.json` (backup)
+- Session: `.gs/session/latest.md` (cross-session recovery)
+- Atomic writes prevent corruption from concurrent access
 
-State is stored in `.gs/state.json` and globally in `~/.gs/project-<name>.json`.
-All state is committed to the project (`.gs/` is gitignored by default).
+## Security
 
-## GitNexus Integration
-
-GS automatically indexes the codebase with GitNexus when starting each phase.
-If GitNexus is not available, GS operates in degraded mode (no graph context) but still enforces the workflow.
+- Pre-commit scan detects hardcoded secrets, API keys, private keys
+- Configurable rules via `.gs/security-rules.json`
+- Privacy hook blocks sensitive file reads until user approval
+- Scout block prevents access to noise directories (node_modules, dist, .git)

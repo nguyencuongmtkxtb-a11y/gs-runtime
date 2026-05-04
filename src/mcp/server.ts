@@ -109,6 +109,43 @@ const TOOL_DEFINITIONS = [
       required: ["output"],
     },
   },
+  {
+    name: "gs_start_workflow",
+    description: "Start a workflow from idle state. Call this when user describes a feature/fix and the project is in idle phase. Modes: 'full' (brainstorm→plan→implement→review→finish) or 'quick' (straight to implementing with relaxed rules).",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        description: { type: "string", description: "Feature/fix description from the user" },
+        mode: { type: "string", enum: ["full", "quick"], description: "Workflow mode: 'full' for complex features, 'quick' for bug fixes and small changes" },
+        ui: { type: "boolean", description: "Whether this is a UI/design task (enables Open Design enforcement)" },
+      },
+      required: ["description", "mode"],
+    },
+  },
+  {
+    name: "gs_register_task",
+    description: "Register a plan task explicitly (alternative to markdown parsing). Use during planning phase to register tasks that will be validated during implementation.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        id: { type: "string", description: "Task ID (e.g., 't1', 'auth-setup')" },
+        description: { type: "string", description: "Task description" },
+        files: {
+          type: "array",
+          items: { type: "string" },
+          description: "File paths this task will create or modify",
+        },
+        tests: {
+          type: "array",
+          items: { type: "string" },
+          description: "Test file paths for this task",
+        },
+        priority: { type: "string", enum: ["high", "medium", "low"], description: "Task priority" },
+        estimatedMinutes: { type: "number", description: "Estimated time in minutes" },
+      },
+      required: ["id", "description", "files"],
+    },
+  },
 ];
 
 function loadProjectState(): { state: GSState | null; error: string | null } {
@@ -147,12 +184,22 @@ export async function startMCPServer(): Promise<void> {
           }
 
           const session = loadSession(process.cwd());
-          const status: MCPWorkflowStatus = {
+          let phaseInstructions: string;
+          if (state.currentPhase === "idle" || state.currentPhase === "completed") {
+            phaseInstructions = "Ready to start. Call gs_start_workflow with the user's request description and mode ('full' for features, 'quick' for fixes/small changes).";
+          } else if (state.workflowMode === "quick") {
+            phaseInstructions = "Quick mode active. File writes unrestricted. Only gs_pre_commit enforced before commits. When done, call gs_propose_transition with target 'reviewing' or 'finishing'.";
+          } else {
+            phaseInstructions = PHASE_DESCRIPTIONS[state.currentPhase];
+          }
+          const quickModeInstructions = phaseInstructions;
+          const status: MCPWorkflowStatus & { workflowMode: string } = {
             currentPhase: state.currentPhase,
             phaseStatus: state.phases[state.currentPhase].status,
             phases: state.phases,
+            workflowMode: state.workflowMode ?? "full",
             gitnexus: { indexed: state.gitnexus.indexed, stale: state.gitnexus.stale },
-            instructions: PHASE_DESCRIPTIONS[state.currentPhase],
+            instructions: quickModeInstructions,
             resumeContext: session ? buildResumeContext(process.cwd()) : null,
           };
 
@@ -177,6 +224,7 @@ export async function startMCPServer(): Promise<void> {
           const filePath = (args as Record<string, unknown>).path as string;
           const operation = (args as Record<string, unknown>).operation as string;
 
+          // Read operations: only privacy hook blocks. No phase/scout gate.
           if (operation === "read") {
             const privacy = checkPrivacy(filePath);
             if (privacy.blocked) {
@@ -184,8 +232,18 @@ export async function startMCPServer(): Promise<void> {
                 content: [{ type: "text", text: `@@PRIVACY_PROMPT_START@@\n${buildPrivacyPrompt(privacy)}\n@@PRIVACY_PROMPT_END@@` }],
               };
             }
+            return {
+              content: [{ type: "text", text: JSON.stringify({
+                allowed: true,
+                path: filePath,
+                phase: currentPhase,
+                reason: "Read operations are always allowed.",
+                planTask: null,
+              } as MCPFileCheckResult, null, 2) }],
+            };
           }
 
+          // Write/edit/delete: scout block applies
           const scout = checkScout(process.cwd(), filePath);
           if (scout.blocked) {
             return {
@@ -199,40 +257,95 @@ export async function startMCPServer(): Promise<void> {
             };
           }
 
+          // Brainstorming/planning: allow writes ONLY to .gs/ directory (design.md, plan.md)
           if (currentPhase === "brainstorming" && operation !== "read") {
+            const normalizedPath = filePath.replace(/\\/g, "/");
+            if (normalizedPath.includes(".gs/") || normalizedPath.startsWith(".gs")) {
+              return {
+                content: [{ type: "text", text: JSON.stringify({
+                  allowed: true,
+                  path: filePath,
+                  phase: currentPhase,
+                  reason: "Writing to .gs/ directory allowed during brainstorming (design doc).",
+                  planTask: null,
+                } as MCPFileCheckResult, null, 2) }],
+              };
+            }
             return {
               content: [{ type: "text", text: JSON.stringify({
                 allowed: false,
                 path: filePath,
                 phase: currentPhase,
-                reason: "In brainstorming phase, only file reads are allowed. Do not write code yet.",
+                reason: "In brainstorming phase, only .gs/ writes allowed. Do not write code yet.",
                 planTask: null,
               } as MCPFileCheckResult, null, 2) }],
             };
           }
 
           if (currentPhase === "planning" && operation !== "read") {
+            const normalizedPath = filePath.replace(/\\/g, "/");
+            if (normalizedPath.includes(".gs/") || normalizedPath.startsWith(".gs")) {
+              return {
+                content: [{ type: "text", text: JSON.stringify({
+                  allowed: true,
+                  path: filePath,
+                  phase: currentPhase,
+                  reason: "Writing to .gs/ directory allowed during planning (plan doc).",
+                  planTask: null,
+                } as MCPFileCheckResult, null, 2) }],
+              };
+            }
             return {
               content: [{ type: "text", text: JSON.stringify({
                 allowed: false,
                 path: filePath,
                 phase: currentPhase,
-                reason: "In planning phase, only file reads are allowed. Write the plan first, then move to implementation.",
+                reason: "In planning phase, only .gs/ writes allowed. Create the plan, then transition to implementing.",
                 planTask: null,
               } as MCPFileCheckResult, null, 2) }],
             };
           }
 
           if (currentPhase === "implementing") {
-            if (state.plan.tasks.length === 0) {
+            // Quick mode: allow all file writes without plan task gate
+            if (state.workflowMode === "quick") {
+              let hookMessages: string[] = [];
+              if (operation === "write" || operation === "edit") {
+                const simplify = trackEditAndCheck(process.cwd());
+                if (simplify.shouldRemind) {
+                  hookMessages.push(simplify.message);
+                }
+              }
               return {
                 content: [{ type: "text", text: JSON.stringify({
                   allowed: true,
                   path: filePath,
                   phase: currentPhase,
-                  reason: "No plan tasks registered. Plan-based gate bypassed (plan.md is source of truth). Run 'gs implement --force' to clear this warning.",
+                  reason: "Quick mode — all file writes allowed. Only gs_pre_commit enforced.",
                   planTask: null,
+                  hooks: hookMessages.length > 0 ? hookMessages : undefined,
                 } as MCPFileCheckResult, null, 2) }],
+              };
+            }
+
+            if (state.plan.tasks.length === 0) {
+              // Check if plan.md exists — if it does, tasks should have been parsed
+              const planPath = join(process.cwd(), ".gs", "plan.md");
+              const planExists = existsSync(planPath);
+              const severity = planExists ? "warn" : "info";
+              const reason = planExists
+                ? `WARNING: plan.md exists but no tasks were parsed. Plan format may be incorrect (expected ### T1 — Task Name pattern). File access allowed but unguarded — review plan format.`
+                : "No plan tasks registered and no plan.md found. File access allowed in degraded mode.";
+
+              return {
+                content: [{ type: "text", text: JSON.stringify({
+                  allowed: true,
+                  path: filePath,
+                  phase: currentPhase,
+                  reason,
+                  planTask: null,
+                  severity,
+                } as MCPFileCheckResult & { severity?: string }, null, 2) }],
               };
             }
 
@@ -479,7 +592,7 @@ export async function startMCPServer(): Promise<void> {
           }
 
           const nextPhase = getNextPhase(prevPhase);
-          const nextLabel = nextPhase ? ` Next: call gs_propose_transition with target "${nextPhase}", then run 'gs ${nextPhase}' in terminal.` : "";
+          const nextLabel = nextPhase ? ` Next: call gs_propose_transition with target "${nextPhase}" to continue.` : "";
 
           const existingSession = loadSession(process.cwd());
           if (existingSession) {
@@ -496,6 +609,104 @@ export async function startMCPServer(): Promise<void> {
               success: true,
               completed_phase: prevPhase,
               message: `Phase "${prevPhase}" completed and output recorded.${nextLabel}`,
+            }, null, 2) }],
+          };
+        }
+
+        case "gs_start_workflow": {
+          if (error || !state) {
+            return { content: [{ type: "text", text: "GS not initialized. Run 'gs init' in terminal first." }] };
+          }
+          if (state.currentPhase !== "idle" && state.currentPhase !== "completed") {
+            return {
+              content: [{ type: "text", text: JSON.stringify({
+                success: false,
+                message: `Workflow already active at phase "${PHASE_LABELS[state.currentPhase]}". Use gs_workflow_status to see current state, or ask user to run 'gs reset' to start over.`,
+              }, null, 2) }],
+            };
+          }
+
+          const workflowArgs = args as Record<string, unknown>;
+          const description = workflowArgs.description as string;
+          const mode = workflowArgs.mode as "full" | "quick";
+          const isUI = (workflowArgs.ui as boolean) ?? false;
+
+          const sm = new StateMachine();
+          let result: { success: boolean; message: string };
+
+          if (mode === "quick") {
+            result = await sm.quick(description);
+          } else {
+            result = await sm.brainstorm(description, isUI);
+          }
+
+          if (!result.success) {
+            return {
+              content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+              isError: true,
+            };
+          }
+
+          const newState = sm.getState();
+          return {
+            content: [{ type: "text", text: JSON.stringify({
+              success: true,
+              mode,
+              phase: newState.currentPhase,
+              isUITask: newState.isUITask,
+              message: mode === "quick"
+                ? `Quick workflow started. You are now in implementing phase. Write code freely, call gs_pre_commit before commits.`
+                : `Full workflow started. You are now in brainstorming phase. Explore requirements, write .gs/design.md, then call gs_record_output + gs_propose_transition to move to planning.`,
+            }, null, 2) }],
+          };
+        }
+
+        case "gs_register_task": {
+          if (error || !state) {
+            return { content: [{ type: "text", text: "GS not initialized." }] };
+          }
+          if (state.currentPhase !== "planning" && state.currentPhase !== "implementing") {
+            return {
+              content: [{ type: "text", text: JSON.stringify({
+                success: false,
+                message: `gs_register_task only allowed in planning or implementing phase. Current: ${PHASE_LABELS[state.currentPhase]}`,
+              }, null, 2) }],
+            };
+          }
+          const taskArgs = args as Record<string, unknown>;
+          const newTask: PlanTask = {
+            id: taskArgs.id as string,
+            description: taskArgs.description as string,
+            files: (taskArgs.files as string[]) ?? [],
+            tests: (taskArgs.tests as string[]) ?? [],
+            status: "pending",
+            priority: (taskArgs.priority as "high" | "medium" | "low") ?? "medium",
+            estimatedMinutes: (taskArgs.estimatedMinutes as number) ?? 5,
+          };
+
+          // Check for duplicate ID
+          const existing = state.plan.tasks.find((t) => t.id === newTask.id);
+          if (existing) {
+            // Update existing task
+            existing.description = newTask.description;
+            existing.files = newTask.files;
+            existing.tests = newTask.tests;
+            existing.priority = newTask.priority;
+            existing.estimatedMinutes = newTask.estimatedMinutes;
+          } else {
+            state.plan.tasks.push(newTask);
+          }
+          if (!state.plan.createdAt) {
+            state.plan.createdAt = new Date().toISOString();
+          }
+          saveState(state);
+
+          return {
+            content: [{ type: "text", text: JSON.stringify({
+              success: true,
+              task_id: newTask.id,
+              message: existing ? `Task "${newTask.id}" updated.` : `Task "${newTask.id}" registered.`,
+              totalTasks: state.plan.tasks.length,
             }, null, 2) }],
           };
         }

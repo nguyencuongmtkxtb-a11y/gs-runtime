@@ -127,8 +127,16 @@ export class StateMachine {
     logger.divider();
     const gnAvailable = isGitNexusAvailable();
     if (gnAvailable) {
-      logger.log("success", "GitNexus detected. Indexing codebase...");
+      logger.log("success", "GitNexus CLI detected. Indexing codebase...");
       await this.autoIndex();
+      // Verify MCP config
+      const mcpConfigOk = this.checkGitNexusMCPConfig();
+      if (!mcpConfigOk) {
+        logger.log("warn", "GitNexus MCP server NOT found in OpenCode config.");
+        logger.log("warn", "Agent won't have graph tools (query, context, impact) without it.");
+        logger.code("Add to ~/.config/opencode/config.json → mcp:");
+        logger.code('  "gitnexus": { "type": "local", "command": ["gitnexus", "mcp"] }');
+      }
     } else {
       logger.log("warn", "GitNexus not found. Install to enable graph features (review, impact analysis):");
       logger.code("npm install -g gitnexus");
@@ -162,7 +170,7 @@ export class StateMachine {
     return { success: true, message: "GS initialized successfully" };
   }
 
-  async brainstorm(description: string): Promise<CommandResult> {
+  async brainstorm(description: string, isUI: boolean = false): Promise<CommandResult> {
     const targetPhase: Phase = "brainstorming";
 
     if (this.state.currentPhase === "brainstorming") {
@@ -180,7 +188,8 @@ export class StateMachine {
       };
     }
 
-    const isUITask = /ui|ux|web|design|landing|page|dashboard|mobile|component|css|style|layout|prototype|frontend|interface|screen|visual|theme/i.test(description);
+    const isUITask = isUI;
+    this.state.isUITask = isUITask;
 
     logger.section(`Phase: ${PHASE_LABELS[targetPhase]}`);
     logger.step(description);
@@ -196,18 +205,11 @@ export class StateMachine {
     }
 
     logger.divider();
-    logger.code("OpenCode will load 'gs' skill → brainstorm workflow");
-    logger.code("Output required: .gs/design.md");
+    logger.code("Go to OpenCode — agent will handle the full workflow automatically.");
+    logger.code("Agent transitions phases via MCP. No further terminal commands needed.");
     if (isUITask) {
-      logger.section("DESIGN TASK DETECTED — Open Design Required");
-      logger.code("1. Browse design systems visually: gs ui (http://127.0.0.1:3456)");
-      logger.code("2. Or query via MCP: gs_search_design_systems");
-      logger.code("3. Load chosen system: gs_load_design_system <name>");
-      logger.code("4. Compose prompt: gs_compose_design_prompt with skill + system");
-      logger.code("5. Pick matching skill: gs_list_design_skills");
+      logger.step("UI task detected — Open Design enforcement active.");
     }
-    logger.code("MCP: gs_record_output → gs_propose_transition planning");
-    logger.code("Then run: gs plan");
 
     this.persist();
     updateSessionFromState(
@@ -217,6 +219,55 @@ export class StateMachine {
       "gs brainstorm",
     );
     return { success: true, message: "Brainstorming phase started" };
+  }
+
+  async quick(description: string): Promise<CommandResult> {
+    if (this.state.currentPhase !== "idle" && this.state.currentPhase !== "completed") {
+      return {
+        success: false,
+        message: `Cannot start quick mode. Current phase: ${PHASE_LABELS[this.state.currentPhase]}. Run 'gs reset' first.`,
+      };
+    }
+
+    // Quick mode: skip brainstorm/plan, go straight to implementing with relaxed rules
+    this.state.workflowMode = "quick";
+
+    // Mark brainstorm + planning as completed (skipped)
+    this.state.phases.brainstorming.status = "completed";
+    this.state.phases.brainstorming.startedAt = new Date().toISOString();
+    this.state.phases.brainstorming.completedAt = new Date().toISOString();
+    this.state.phases.brainstorming.notes.push("Skipped (quick mode)");
+    this.state.phases.planning.status = "completed";
+    this.state.phases.planning.startedAt = new Date().toISOString();
+    this.state.phases.planning.completedAt = new Date().toISOString();
+    this.state.phases.planning.notes.push("Skipped (quick mode)");
+
+    // Jump to implementing
+    this.state.currentPhase = "implementing";
+    this.state.phases.implementing.status = "in_progress";
+    this.state.phases.implementing.startedAt = new Date().toISOString();
+
+    logger.section("Quick Mode — Lightweight Workflow");
+    logger.step(description);
+    logger.step("Skipped: brainstorm, plan");
+    logger.step("Enforced: gs_check_file (write), gs_pre_commit (security scan)");
+    logger.step("File writes: unrestricted (no plan task gate)");
+
+    await this.ensureGitNexusIndex();
+
+    logger.divider();
+    logger.code("Agent can read/write any file freely");
+    logger.code("MANDATORY: gs_pre_commit before EVERY commit");
+    logger.code("When done: gs_propose_transition reviewing (or gs finish)");
+
+    this.persist();
+    updateSessionFromState(
+      createInitialSession(this.state.project),
+      this.state,
+      this.projectRoot,
+      "gs quick",
+    );
+    return { success: true, message: "Quick mode started — implementing with relaxed rules" };
   }
 
   async plan(force: boolean = false): Promise<CommandResult> {
@@ -249,10 +300,7 @@ export class StateMachine {
     await this.ensureGitNexusIndex();
 
     logger.divider();
-    logger.code("OpenCode will load 'gs' skill → planning workflow");
-    logger.code("Output required: .gs/plan.md");
-    logger.code("MCP: gs_record_output → gs_propose_transition implementing");
-    logger.code("Then run: gs implement");
+    logger.code("Agent handles planning automatically. No further terminal commands needed.");
 
     this.persist();
     updateSessionFromState(
@@ -302,13 +350,8 @@ export class StateMachine {
     await this.ensureGitNexusIndex();
 
     logger.divider();
-    logger.code("OpenCode will execute TDD: RED → GREEN → REFACTOR");
-    logger.code("MANDATORY: gs_check_file before EVERY file operation");
-    logger.code("MANDATORY: gs_pre_commit before EVERY commit");
-    logger.code("MCP: gs_complete_task after each task");
-    logger.code("MCP: gs_record_output → gs_propose_transition reviewing");
+    logger.code("Agent handles implementation automatically (TDD cycle).");
     logger.code("Check progress: gs status");
-    logger.code("When done: gs review");
 
     this.persist();
     updateSessionFromState(
@@ -349,9 +392,7 @@ export class StateMachine {
     await this.reindexGitNexus();
 
     logger.divider();
-    logger.code("OpenCode will review code with GitNexus detect_changes + impact");
-    logger.code("MCP: gs_record_output → gs_propose_transition finishing");
-    logger.code("Then run: gs finish");
+    logger.code("Agent handles review automatically. Transitions to finish when done.");
 
     this.persist();
     updateSessionFromState(
@@ -554,6 +595,27 @@ export class StateMachine {
       success: true,
       message: `Phase "${this.state.currentPhase}" completed. Call gs_propose_transition to move forward.`,
     };
+  }
+
+  private checkGitNexusMCPConfig(): boolean {
+    const configPaths = [
+      join(process.env.HOME ?? process.env.USERPROFILE ?? "", ".config", "opencode", "config.json"),
+      join(process.env.HOME ?? process.env.USERPROFILE ?? "", ".config", "opencode", "config.toml"),
+    ];
+    for (const configPath of configPaths) {
+      if (existsSync(configPath)) {
+        try {
+          const raw = readFileSync(configPath, "utf-8");
+          // Simple check: does it mention gitnexus in MCP section?
+          if (raw.includes("gitnexus") && (raw.includes("mcp") || raw.includes("[mcp"))) {
+            return true;
+          }
+        } catch {
+          // Can't read — assume not configured
+        }
+      }
+    }
+    return false;
   }
 
   private async ensureGitNexusIndex(): Promise<void> {

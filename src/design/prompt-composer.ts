@@ -2,8 +2,9 @@ import { join } from "node:path";
 import type { ComposeParams } from "./types.js";
 import { loadDesignSystem } from "./design-system-loader.js";
 import { getSkillByName } from "./skill-loader.js";
+import { getGSInstallRoot } from "../shared/paths.js";
 
-const PROMPTS_DIR = join(process.cwd(), "prompts");
+const PROMPTS_DIR = join(getGSInstallRoot(), "prompts");
 
 function getIdentityCharter(): string {
   return `You are a design engineer. You produce production-quality HTML/CSS artifacts

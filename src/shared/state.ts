@@ -1,6 +1,7 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync, renameSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
+import { randomBytes } from "node:crypto";
 import type { GSState, Phase, PhaseState, PhaseStatus, PlanTask } from "./types.js";
 import { PHASE_ORDER, PHASE_LABELS } from "./types.js";
 
@@ -50,6 +51,8 @@ export function createInitialState(projectName?: string): GSState {
     project: projectName ?? "unknown",
     currentPhase: "idle",
     proposedPhase: null,
+    workflowMode: "full",
+    isUITask: false,
     phases: phaseMap,
     gitnexus: {
       indexed: false,
@@ -80,16 +83,34 @@ export function loadState(projectRoot?: string): GSState | null {
   }
 }
 
+/**
+ * Atomic write: write to .tmp file then rename.
+ * Prevents data corruption if process is killed mid-write or concurrent access occurs.
+ */
+function atomicWriteFileSync(filePath: string, data: string): void {
+  const tmpPath = `${filePath}.${randomBytes(4).toString("hex")}.tmp`;
+  writeFileSync(tmpPath, data, "utf-8");
+  try {
+    renameSync(tmpPath, filePath);
+  } catch {
+    // On Windows, rename can fail if target is locked. Fallback to direct write.
+    writeFileSync(filePath, data, "utf-8");
+    try { unlinkSync(tmpPath); } catch { /* ignore cleanup failure */ }
+  }
+}
+
 export function saveState(state: GSState, projectRoot?: string): void {
   const stateDir = getStateDir(projectRoot);
   ensureDir(stateDir);
   ensureDir(getGlobalDir());
 
   state.meta.updatedAt = new Date().toISOString();
-  writeFileSync(getStatePath(projectRoot), JSON.stringify(state, null, 2), "utf-8");
+  const serialized = JSON.stringify(state, null, 2);
+
+  atomicWriteFileSync(getStatePath(projectRoot), serialized);
 
   const globalStatePath = join(getGlobalDir(), `project-${sanitizeProjectName(state.project)}.json`);
-  writeFileSync(globalStatePath, JSON.stringify(state, null, 2), "utf-8");
+  atomicWriteFileSync(globalStatePath, serialized);
 }
 
 export function deleteState(projectRoot?: string): void {
@@ -231,65 +252,96 @@ export function setPhaseStatus(
   return state;
 }
 
+/**
+ * Parse plan tasks from markdown. Supports multiple heading formats:
+ * - ### T1 — Task Name
+ * - ### Task 1: Task Name
+ * - ### Task 1 - Task Name
+ * - ### 1. Task Name
+ * - ### 1) Task Name
+ * - ### Step 1 — Task Name
+ */
 export function parsePlanTasks(planContent: string): PlanTask[] {
   const tasks: PlanTask[] = [];
   const lines = planContent.split("\n");
 
-  const taskPattern = /^###\s+(T\d[\d.]*|Task\s+\d+)\s*[—–:-]\s*(.+)$/;
+  // Multiple patterns for task headings (ordered by specificity)
+  const taskPatterns = [
+    /^###\s+(T\d[\d.]*|Task\s+\d+|Step\s+\d+)\s*[—–:\-]\s*(.+)$/i,
+    /^###\s+(\d+)\.\s+(.+)$/,
+    /^###\s+(\d+)\)\s+(.+)$/,
+    /^##\s+(T\d[\d.]*|Task\s+\d+|Step\s+\d+)\s*[—–:\-]\s*(.+)$/i,
+    /^##\s+(\d+)\.\s+(.+)$/,
+  ];
+
   let currentTask: Partial<PlanTask> | null = null;
 
   for (const line of lines) {
-    const match = line.match(taskPattern);
-    if (match) {
-      if (currentTask && currentTask.id) {
-        finalizeTask(currentTask, tasks);
+    let matched = false;
+    for (const pattern of taskPatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        if (currentTask && currentTask.id) {
+          finalizeTask(currentTask, tasks);
+        }
+        const rawId = match[1];
+        const id = rawId.replace(/\./g, "_").replace(/\s+/g, "_").toLowerCase();
+        currentTask = {
+          id: id.startsWith("t") || id.startsWith("task") || id.startsWith("step") ? id : `t${id}`,
+          description: `${rawId}: ${match[2].trim()}`,
+          files: [],
+          tests: [],
+          status: "pending",
+          priority: "medium",
+          estimatedMinutes: 3,
+        };
+        matched = true;
+        break;
       }
-      currentTask = {
-        id: match[1].replace(/\./g, "_").replace(/\s+/g, "_").toLowerCase(),
-        description: `${match[1]}: ${match[2].trim()}`,
-        files: [],
-        tests: [],
-        status: "pending",
-        priority: "medium",
-        estimatedMinutes: 3,
-      };
-      continue;
     }
+    if (matched) continue;
 
     if (currentTask) {
-      const fileMatch = line.match(/^\s*- \*\*Files?\*\*:\s*(.+)$/);
+      // File references: multiple formats
+      const fileMatch = line.match(/^\s*-\s*\*\*Files?\*\*:\s*(.+)$/i) ||
+                        line.match(/^\s*-\s*Files?:\s*(.+)$/i) ||
+                        line.match(/^\s*-\s*`([^`]+\.\w+)`/);
       if (fileMatch) {
         const raw = fileMatch[1];
         const fileRefs = raw
-          .split(/,|và|and/)
+          .split(/,|và|and|;/)
           .map((s) => s.trim())
           .filter(Boolean);
         for (const ref of fileRefs) {
           const cleaned = ref
             .replace(/[`*]/g, "")
-            .replace(/\(create\)|\(edit\)|\(create\s+dir\)|\(create\s+file\)/gi, "")
+            .replace(/\(create\)|\(edit\)|\(new\)|\(modify\)|\(create\s+dir\)|\(create\s+file\)/gi, "")
             .trim();
-          if (cleaned && !cleaned.startsWith("•") && cleaned.length > 1) {
+          if (cleaned && !cleaned.startsWith("•") && cleaned.length > 1 && cleaned.includes("/") || cleaned.includes(".")) {
             currentTask.files!.push(cleaned);
           }
         }
       }
 
-      const testMatch = line.match(/^\s*- \*\*Tests\*\*:\s*(.+)$/);
+      // Test references
+      const testMatch = line.match(/^\s*-\s*\*\*Tests?\*\*:\s*(.+)$/i) ||
+                        line.match(/^\s*-\s*Tests?:\s*(.+)$/i);
       if (testMatch) {
         const testFiles = testMatch[1]
-          .split(/,/)
+          .split(/,|;/)
           .map((s) => s.trim().replace(/[`*]/g, ""))
           .filter(Boolean);
         currentTask.tests!.push(...testFiles);
       }
 
-      const priorityMatch = line.match(/^\s*- \*\*Priority\*\*:\s*(high|medium|low)/i);
+      const priorityMatch = line.match(/^\s*-\s*\*\*Priority\*\*:\s*(high|medium|low)/i) ||
+                            line.match(/^\s*-\s*Priority:\s*(high|medium|low)/i);
       if (priorityMatch) {
         currentTask.priority = priorityMatch[1].toLowerCase() as "high" | "medium" | "low";
       }
 
-      const estMatch = line.match(/^\s*- \*\*Est\*\*:\s*(\d+)\s*min/i);
+      const estMatch = line.match(/^\s*-\s*\*\*(?:Est|Estimate|Time)\*\*:\s*(\d+)\s*min/i) ||
+                       line.match(/^\s*-\s*(?:Est|Estimate|Time):\s*(\d+)\s*min/i);
       if (estMatch) {
         currentTask.estimatedMinutes = parseInt(estMatch[1], 10);
       }

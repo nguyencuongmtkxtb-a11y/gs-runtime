@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { DesignSkill } from "./types.js";
+import { getDesignSkillsRoot } from "../shared/paths.js";
 
-const SKILLS_ROOT = join(process.cwd(), "integrations", "open-design", "skills");
+const SKILLS_ROOT = getDesignSkillsRoot();
 
 const skillCache = new Map<string, DesignSkill>();
 

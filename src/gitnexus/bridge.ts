@@ -1,7 +1,16 @@
+/**
+ * GitNexus Bridge — Orchestration-Only Layer
+ *
+ * IMPORTANT: This bridge handles ONLY indexing orchestration (analyze, check index).
+ * Actual graph queries (query, context, impact, detect_changes) are performed by
+ * GitNexus's own MCP server which OpenCode connects to directly.
+ *
+ * GS MCP server's `gs_inject_context` returns instructions for the agent to use
+ * GitNexus MCP tools — it does NOT proxy graph queries through this bridge.
+ */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { platform } from "node:os";
-import type { GitNexusContext, GitNexusQueryResult } from "../shared/types.js";
 import { logger } from "../shared/logger.js";
 
 const isWin = platform() === "win32";
@@ -46,6 +55,10 @@ function runGitNexus(args: string[], cwd?: string): { success: boolean; stdout: 
   };
 }
 
+/**
+ * Trigger GitNexus indexing/analysis for the project.
+ * This creates/refreshes the .gitnexus/ knowledge graph.
+ */
 export function analyze(projectPath?: string, force: boolean = false): { success: boolean; message: string } {
   logger.log("info", "Running GitNexus analysis...");
   const args = ["analyze"];
@@ -61,35 +74,18 @@ export function analyze(projectPath?: string, force: boolean = false): { success
   return { success: false, message: result.stderr || "Analysis failed" };
 }
 
+/**
+ * Check if GitNexus index exists for the project.
+ */
 export function checkIndex(projectPath?: string): { indexed: boolean; stale: boolean } {
   const gitnexusDir = `${projectPath ?? process.cwd()}/.gitnexus`;
   const indexed = existsSync(gitnexusDir);
   return { indexed, stale: false };
 }
 
-export function query(searchQuery: string, projectPath?: string): GitNexusContext {
-  if (!isAvailable()) {
-    return { query: searchQuery, results: null, indexed: false, error: "GitNexus not available" };
-  }
-
-  const mcpResult = runGitNexus(["mcp"], projectPath);
-  if (!mcpResult.success) {
-    return { query: searchQuery, results: null, indexed: false, error: "MCP server not available" };
-  }
-
-  const defaultResult: GitNexusQueryResult = {
-    processes: [],
-    definitions: [],
-  };
-
-  return {
-    query: searchQuery,
-    results: defaultResult,
-    indexed: true,
-    error: null,
-  };
-}
-
+/**
+ * Get GitNexus status for the project.
+ */
 export function getStatus(projectPath?: string): { indexed: boolean; stale: boolean; repos: string[] } {
   const result = runGitNexus(["status"], projectPath);
   const { indexed, stale } = checkIndex(projectPath);

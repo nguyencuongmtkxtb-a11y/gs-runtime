@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
 import { join, basename } from "node:path";
 import type { DesignSystem, DesignSystemSummary } from "./types.js";
+import { getDesignSystemsRoot } from "../shared/paths.js";
 
-const DESIGN_SYSTEMS_ROOT = join(process.cwd(), "integrations", "open-design", "design-systems");
+const DESIGN_SYSTEMS_ROOT = getDesignSystemsRoot();
 
 const MAX_CACHE_SIZE = 10;
 const systemCache = new Map<string, DesignSystem>();

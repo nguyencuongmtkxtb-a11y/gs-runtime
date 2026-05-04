@@ -37,15 +37,16 @@ MANDATORY STEPS:
 1. Call gs_workflow_status to confirm phase
 2. Load the 'gs' skill via the skill tool
 3. Use GitNexus query/context to understand existing codebase patterns
-4. DETECT: Is this a UI/visual task? If YES:
+4. If this is a UI/visual task (state.isUITask === true):
    a. Call gs_list_design_skills to find relevant design skills
    b. Call gs_search_design_systems with keyword to find matching design system
    c. Call gs_compose_design_prompt in discovery mode
 5. Ask clarifying questions about requirements, constraints, edge cases
-6. Propose architecture and design decisions (include design system choice)
+6. Propose architecture and design decisions (include design system choice if UI)
 7. Validate each decision with the user
 8. Write design document to .gs/design.md
-9. Call gs_propose_transition with target: "planning"
+9. Call gs_record_output then gs_propose_transition with target: "planning"
+   (transition happens automatically — no terminal command needed)
 
 DO NOT write any implementation code. Focus on WHAT and WHY, not HOW.`;
 
@@ -57,22 +58,21 @@ MANDATORY STEPS:
 1. Call gs_workflow_status to confirm phase
 2. Load the 'gs' skill via the skill tool
 3. Review the design document at .gs/design.md
-4. DETECT: Does plan include UI tasks? If YES:
+4. If state.isUITask === true:
    a. Call gs_load_design_system with the name from design doc
    b. Call gs_compose_design_prompt with skill + system
    c. All UI tasks MUST reference loaded design tokens
 5. Use GitNexus impact tool to calculate blast radius for each change
 6. Break work into tasks of 2-5 minutes each
 7. For each task: exact file paths, test files, code structure, verification
-8. Use GitNexus context to find existing patterns to follow
-9. Write plan to .gs/plan.md
-10. Call gs_propose_transition with target: "implementing"
+8. Use gs_register_task to register each task (or write .gs/plan.md — both work)
+9. Call gs_record_output then gs_propose_transition with target: "implementing"
+   (transition happens automatically — no terminal command needed)
 
 Each task must include:
 - Exact file paths to create/modify
 - Test file and test cases
 - Expected code structure
-- Design tokens reference (colors, fonts, spacing from design system)
 - Verification steps`;
 
     case "implementing":
@@ -82,24 +82,22 @@ You are in the IMPLEMENTING phase. Execute the plan using TDD.
 MANDATORY STEPS:
 1. Call gs_workflow_status to confirm phase
 2. Load the 'gs' skill via the skill tool
-3. Load the plan from .gs/plan.md
-4. DETECT: Are there UI tasks? BEFORE writing any CSS:
+3. Load the plan from .gs/plan.md (or check registered tasks)
+4. If state.isUITask === true, BEFORE writing any CSS:
    a. Call gs_compose_design_prompt with skill + design system
    b. Keep design tokens visible — ZERO ad-hoc CSS
-5. For EACH task, follow strict TDD:
-   a. Call gs_check_file BEFORE every file operation
-   b. Write failing test first
-   c. Run test, confirm it fails
-   d. Write minimal implementation
-   e. Run test, confirm it passes
-   f. Refactor if needed
+5. For EACH task, follow TDD:
+   a. Write failing test first
+   b. Write minimal implementation
+   c. Run test, confirm it passes
+   d. Refactor if needed
 6. Call gs_pre_commit BEFORE every commit
-7. After commit, GitNexus will be auto-refreshed
-8. Mark tasks complete via gs_complete_task
-9. When all tasks done, call gs_propose_transition with target: "reviewing"
+7. Mark tasks complete via gs_complete_task
+8. When all tasks done, call gs_record_output then gs_propose_transition with target: "reviewing"
+   (transition happens automatically — no terminal command needed)
 
-CRITICAL: Never write code before its test. Never skip gs_check_file.
-CRITICAL: Never write CSS without first loading design system tokens.`;
+CRITICAL: Never write code before its test.
+CRITICAL: Never write CSS without first loading design system tokens (UI tasks only).`;
 
     case "reviewing":
       return `### Review Instructions
@@ -111,19 +109,14 @@ MANDATORY STEPS:
 3. Use GitNexus detect_changes to see all modified code
 4. Use GitNexus impact to verify blast radius of changes
 5. Review each changed file against the plan
-6. DETECT: Were there UI changes? If YES:
+6. If state.isUITask === true:
    a. Call gs_compose_design_prompt in critique mode
    b. Verify all colors/fonts/spacing match loaded design system
-   c. Flag ad-hoc values as HIGH severity violations
 7. Verify all tests pass
-8. Check for:
-   - Missing tests
-   - Performance issues
-   - Security vulnerabilities
-   - Breaking changes
-   - Design token violations
+8. Check for: missing tests, performance issues, security vulnerabilities, breaking changes
 9. Report issues by severity (critical blocks merge)
-10. Call gs_propose_transition with target: "finishing"`;
+10. Call gs_record_output then gs_propose_transition with target: "finishing"
+    (transition happens automatically — no terminal command needed)`;
 
     case "finishing":
       return `### Finishing Instructions
@@ -133,11 +126,11 @@ MANDATORY STEPS:
 1. Call gs_workflow_status to confirm phase
 2. Load the 'gs' skill via the skill tool
 3. Run full test suite
-4. Use GitNexus detect_changes for final impact check
-5. Clean up temporary files
-6. Verify documentation is updated
-7. Present merge/PR options to user
-8. Call gs_propose_transition with target: "completed"`;
+4. Clean up temporary files
+5. Verify documentation is updated
+6. Present merge/PR options to user
+7. Call gs_record_output then gs_propose_transition with target: "completed"
+   (workflow completes automatically)`;
 
     default:
       return `### Instructions

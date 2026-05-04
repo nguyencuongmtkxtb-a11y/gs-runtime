@@ -32,9 +32,23 @@ program
   .command("brainstorm")
   .description("Start brainstorming phase")
   .argument("<description>", "Feature or idea description")
+  .option("--ui", "Mark as UI/design task (enables Open Design enforcement)")
+  .action(async (description, opts) => {
+    const sm = new StateMachine();
+    const result = await sm.brainstorm(description, opts.ui ?? false);
+    if (!result.success) {
+      logger.log("error", result.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("quick")
+  .description("Quick mode — skip brainstorm/plan for trivial tasks (bug fixes, small changes)")
+  .argument("<description>", "Brief description of the change")
   .action(async (description) => {
     const sm = new StateMachine();
-    const result = await sm.brainstorm(description);
+    const result = await sm.quick(description);
     if (!result.success) {
       logger.log("error", result.message);
       process.exit(1);

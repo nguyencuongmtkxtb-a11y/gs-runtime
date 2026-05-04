@@ -9,6 +9,12 @@ export type Phase =
 
 export type PhaseStatus = "pending" | "in_progress" | "completed" | "blocked";
 
+/** Workflow mode determines enforcement level */
+export type WorkflowMode = "full" | "quick";
+
+/** Whether Open Design enforcement is active for this workflow */
+export type UITaskMode = boolean;
+
 export const PHASE_ORDER: Phase[] = [
   "idle",
   "brainstorming",
@@ -53,6 +59,8 @@ export interface GSState {
   project: string;
   currentPhase: Phase;
   proposedPhase: Phase | null;
+  workflowMode: WorkflowMode;
+  isUITask: UITaskMode;
   phases: Record<Phase, PhaseState>;
   gitnexus: {
     indexed: boolean;
