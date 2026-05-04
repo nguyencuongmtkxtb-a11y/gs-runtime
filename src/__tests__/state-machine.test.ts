@@ -52,10 +52,18 @@ describe("State Machine", () => {
       expect(canTransitionTo("finishing", "reviewing")).toBe(true);
     });
 
-    it("should NOT allow skipping phases forward", () => {
-      expect(canTransitionTo("idle", "planning")).toBe(false);
-      expect(canTransitionTo("brainstorming", "implementing")).toBe(false);
+    it("should allow skipping ONE phase forward (for quick mode)", () => {
+      // +2 forward allowed (skip 1 phase)
+      expect(canTransitionTo("idle", "planning")).toBe(true);
+      expect(canTransitionTo("brainstorming", "implementing")).toBe(true);
+      expect(canTransitionTo("implementing", "finishing")).toBe(true);
+    });
+
+    it("should NOT allow skipping 2+ phases forward", () => {
+      // +3 or more NOT allowed
+      expect(canTransitionTo("idle", "implementing")).toBe(false);
       expect(canTransitionTo("idle", "reviewing")).toBe(false);
+      expect(canTransitionTo("brainstorming", "reviewing")).toBe(false);
     });
 
     it("should NOT allow backward jump of 2+ phases", () => {

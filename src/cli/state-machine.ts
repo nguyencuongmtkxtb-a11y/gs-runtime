@@ -13,6 +13,7 @@ import {
   deleteState,
   canTransitionTo as canTransition,
   validatePhaseTransition,
+  parsePlanTasks,
 } from "../shared/state.js";
 import { analyze as gitnexusAnalyze, checkIndex, isAvailable as isGitNexusAvailable } from "../gitnexus/bridge.js";
 import { logger } from "../shared/logger.js";
@@ -335,6 +336,22 @@ export class StateMachine {
       return { success: false, message: result.reason };
     }
     this.state = result.state;
+
+    // Auto-parse plan tasks from plan.md if not already registered
+    if (this.state.plan.tasks.length === 0) {
+      const planPath = join(this.projectRoot, ".gs", "plan.md");
+      if (existsSync(planPath)) {
+        const planContent = readFileSync(planPath, "utf-8");
+        const extracted = parsePlanTasks(planContent);
+        if (extracted.length > 0) {
+          this.state.plan.tasks = extracted;
+          if (!this.state.plan.createdAt) {
+            this.state.plan.createdAt = new Date().toISOString();
+          }
+          logger.log("success", `Parsed ${extracted.length} tasks from plan.md`);
+        }
+      }
+    }
 
     logger.section(`Phase: ${PHASE_LABELS[targetPhase]}`);
     logger.step(PHASE_DESCRIPTIONS[targetPhase]);

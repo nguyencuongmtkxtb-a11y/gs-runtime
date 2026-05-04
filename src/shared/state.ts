@@ -147,7 +147,9 @@ export function canTransitionTo(
     completed: [],
   };
 
+  // Allow +1 (next phase) or +2 (skip one phase, e.g. implementing → finishing)
   if (targetIndex === currentIndex + 1) return true;
+  if (targetIndex === currentIndex + 2) return true;
   if (backward[currentPhase]?.includes(targetPhase)) return true;
   return false;
 }
